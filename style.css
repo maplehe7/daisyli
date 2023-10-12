@@ -1,7 +1,6 @@
-html,
 body {
   padding: 0;
-  margin: 0
+  margin: 0;
 }
 
 .navbar {
@@ -22,10 +21,9 @@ body {
 .logo {
   display: flex;
   flex-direction: row;
-  font-family: 'Marcellus', serif;
-  font-size: 2.0rem;
+  font-family: "Marcellus", serif;
+  font-size: 2rem;
   align-items: center;
-
 }
 
 .options {
@@ -33,19 +31,19 @@ body {
   flex-direction: row;
   justify-content: space-around;
   width: 40%;
-  font-family: 'Roboto', sans-serif;
+  font-family: "Roboto", sans-serif;
   font-size: 1.3rem;
-
 }
 
 .daisylogo {
   width: 60px;
-  margin-right: 10px
+  margin-right: 10px;
 }
+
 
 .big_img {
   position: relative;
-  height: 500px;
+  height: 100vh;
   overflow: hidden;
 }
 
@@ -61,41 +59,39 @@ body {
 }
 
 .big_img h1 {
+  display: flex;
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  font-family: 'Montserrat', serif;
+  font-family: "Montserrat", serif;
   color: white;
-  font-size: 3.0rem;
+  font-size: 3rem;
   text-align: center;
+  align-items: center;
+  justify-content: center;
   z-index: 1;
-
-
 }
 
 .about-me {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  align-items: center
+  align-items: center;
 }
 
 .about_c {
   display: flex;
   justify-content: space-around;
   align-items: center;
-  font-family: 'Montserrat', serif;
+  font-family: "Montserrat", serif;
   padding: 10%;
 }
 
-.about_c p {
-  width: 30%;
-}
 
 .about_c p {
   font-size: 1.5rem;
-  width: 100%
+  width: 100%;
 }
 
 .headshot {
@@ -105,12 +101,11 @@ body {
 
 .aboutdays {
   font-size: 3rem;
-  font-family: 'Montserrat', serif;
+  font-family: "Montserrat", serif;
   text-align: center;
 }
 
 button {
-
   background: transparent;
   border: none !important;
 }
@@ -125,14 +120,11 @@ button {
   flex-direction: row;
   justify-content: center;
   align-items: center;
-  font-family: 'Montserrat', serif;
+  font-family: "Montserrat", serif;
 }
-
-
 
 .all_houses {
   width: 40%;
-
   height: 340px;
   overflow-y: scroll;
 }
@@ -140,17 +132,15 @@ button {
 a {
   color: inherit;
   text-decoration: none;
-
 }
 
 .testimonials {
   display: flex;
-  font-family: 'Montserrat', serif;
+  font-family: "Montserrat", serif;
   justify-content: center;
   margin-top: 50px;
   background-color: #f1f1f1;
   padding: 5%;
-
 }
 
 .text-t {
@@ -168,7 +158,7 @@ a {
   display: flex;
   color: white;
   height: 100vh;
-  font-family: 'Montserrat', serif;
+  font-family: "Montserrat", serif;
   justify-content: center;
   align-items: center;
   flex-direction: column;
@@ -176,7 +166,7 @@ a {
 
 .neighbor_img {
   width: 300px;
-  margin: 20px
+  margin: 20px;
 }
 
 .nb_div {
@@ -196,7 +186,7 @@ a {
   display: flex;
   flex-direction: column;
   align-items: center;
-  font-family: 'Montserrat', serif;
+  font-family: "Montserrat", serif;
   background-color: #000000;
   color: white;
   height: 100vh;
@@ -207,7 +197,6 @@ a {
   color: white;
   border: 2px white solid !important;
   padding: 0 50px;
-
 }
 
 .contacts h1 {
@@ -219,27 +208,83 @@ a {
   color: black;
   border: 2px black solid !important;
   padding: 0 40px;
-
 }
 
 .about_me_button p {
   display: flex;
   width: 100%;
   font-size: 15px;
-
 }
 
 .about_c div {
-  width: 50%
+  width: 50%;
 }
 
 .about_des {
   width: 100%;
-}
 
+}
 
 .t_button {
   color: black;
   border: 2px black solid !important;
   padding: 5px 60px;
 }
+
+@media only screen and (max-width: 600px) {
+
+
+  .big_img {
+    width: 100vw
+  }
+
+  .logo {
+    font-size: 1rem;
+  }
+
+  .daisylogo {
+    width: 40px;
+  }
+
+  .options {
+    width: 100%;
+    font-size: 0.8rem;
+  }
+
+  .nb_div {
+    overflow-x: auto;
+    max-width: 100vw;
+  }
+
+  .t_button {
+    padding: 0
+  }
+
+  .about_des {
+    font-size: 1.3rem !important;
+
+
+  }
+
+  .about_c {
+    flex-direction: column-reverse;
+    width: 100%;
+    padding: 0;
+  }
+
+  about_c p {
+    width: 100vw !important;
+  }
+
+  .headshot {
+    width: 80%;
+    border-radius: 25%;
+  }
+
+  .aboutdays p {
+    margin-bottom: 20px;
+  }
+}
+button:hover {
+			background-color: #e5e1e1;
+		}
