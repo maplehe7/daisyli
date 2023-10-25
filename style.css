@@ -337,8 +337,11 @@ button:hover {
  
   color: black;
   border: 2px black solid !important;
+  justify-content: center;
+  align-items: center;
   
 }
 .cons1{
   justify-content: center;
+  align-items: center;
 }
