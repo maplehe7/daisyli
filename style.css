@@ -335,13 +335,15 @@ button:hover {
 }
 .cons{
  
+  display: flex;
   color: black;
   border: 2px black solid !important;
   justify-content: center;
-  align-items: center;
+
   
 }
 .cons1{
+  display: flex;
   justify-content: center;
-  align-items: center;
+
 }
