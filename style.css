@@ -349,3 +349,8 @@ button:hover {
   font-family: "Montserrat", serif;
 
 }
+.conpt{
+  display: flex;
+  justify-content: center;
+  font-family: "Montserrat", serif;
+}
