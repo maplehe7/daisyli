@@ -339,11 +339,13 @@ button:hover {
   color: black;
   border: 2px black solid !important;
   justify-content: center;
+  font-family: "Montserrat", serif;
 
   
 }
 .cons1{
   display: flex;
   justify-content: center;
+  font-family: "Montserrat", serif;
 
 }
