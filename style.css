@@ -333,3 +333,12 @@ button:hover {
   font-family: "Montserrat", serif;
   font-weight: bold;
 }
+.cons{
+ 
+  color: black;
+  border: 2px black solid !important;
+  
+}
+.cons1{
+  justify-content: center;
+}
