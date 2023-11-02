@@ -167,6 +167,7 @@ a {
   justify-content: center;
   align-items: center;
   flex-direction: column;
+  height: 100vh;
 }
 
 .neighbor_img {
@@ -300,6 +301,7 @@ button:hover {
   font-family: "Montserrat", serif;
   display: flex;
   justify-content: center;
+  margin-top: 5%;
 }
 
 .aboutp {
@@ -333,24 +335,41 @@ button:hover {
   font-family: "Montserrat", serif;
   font-weight: bold;
 }
-.cons{
- 
+
+.cons {
+
   display: flex;
   color: black;
   border: 2px black solid !important;
   justify-content: center;
   font-family: "Montserrat", serif;
 
-  
+
 }
-.cons1{
+
+.cons1 {
   display: flex;
   justify-content: center;
   font-family: "Montserrat", serif;
 
 }
-.conpt{
+
+.conpt {
   display: flex;
   justify-content: center;
   font-family: "Montserrat", serif;
+}
+
+.testimonials_page {
+  font-family: "Montserrat", serif;
+  display: flex;
+  flex-direction: column;
+  padding-left: 20%;
+  padding-right: 20%;
+  margin-bottom: 5%;
+
+}
+
+.neighbor_txt {
+  font-size: 5rem !important;
 }
