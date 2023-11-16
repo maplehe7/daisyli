@@ -11,6 +11,10 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Marcellus&family=Montserrat:wght@300&family=Roboto:wght@300;400&display=swap"
     rel="stylesheet" />
+
+  <!-- BOOTSTRAP -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css"
+    integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 </head>
 
 <body>
@@ -19,26 +23,28 @@
   <!-- bigimage -->
   <div class="big_img">
     <!-- NAVBAR -->
-    <div class="navbar">
-      <div class="logo">
-        <a href="/" style="display:flex; justify-content: center; align-items: center;">
-          <img class="daisylogo" src="daisylogo.png" alt="logo" />
-        </a>
-
-        <p>Daisy Li</p>
-      </div>
-      <div class="options">
-        <p><a href="aboutdaisy.html">About Me</a></p>
-        <p><a href="portfolio.html">Portfolio</a></p>
-        <p><a href="testimonials.html">Testimonials</a></p>
-        <p><a href="mailto:mailto:daisylibroker@gmail.com">Contact Me</a></p>
-        <div class="container" onclick="myFunction(this)">
-          <div class="bar1"></div>
-          <div class="bar2"></div>
-          <div class="bar3"></div>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-transparent ">
+      <a class="logo color-white" href="#">
+        <img class="daisylogo" src="daisylogo.png" alt="logo" />
+        <p class="logo">
+          Daisy Li
+        </p>
+      </a>
+      <button class="navbar-toggler color-white" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup"
+        aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse " id="navbarNavAltMarkup">
+        <div class="navbar-nav options ml-auto" style="color: white !important; width: 40vw;">
+          <a class="nav-item nav-link active" href="aboutdaisy.html">About Me </a>
+          <a class="nav-item nav-link" href="portfolio.html">Portfolio</a>
+          <a class="nav-item nav-link" href="testimonials.html">Testimonials</a>
+          <a class="nav-item nav-link" href="mailto:mailto:daisylibroker@gmail.com">Contact Me</a>
         </div>
       </div>
-    </div>
+    </nav>
+
+
     <video autoplay muted loop poster="daisypic.webp" id="video-bg">
       <source src="ww.mp4" type="video/mp4" />
       Your browser does not support the video tag.
@@ -176,7 +182,9 @@
         the escrow in 10 days. We are truly thankful fo... — RSA Y.
       </p>
       <button class="t_button">
+        <a href="testimonials.html">
         <p>VIEW ALL</p>
+          </a>
       </button>
     </div>
   </div>
@@ -231,13 +239,22 @@
 Nestled in the lush and picturesque rear yard in Woodbury, this desirable Portisol Track home will impress you with stunning curb appeal and inviti...
 133 Iron Horse, Irvine
 How pleasant to walk down to a quiet cul-de-sac, and enter the serene -->
-  <script src="script.js"></script>
+  <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+    integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+    crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js"
+    integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+    crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js"
+    integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+    crossorigin="anonymous"></script>
 
   <!--
   This script places a badge on your repl's full-browser view back to your repl's cover
   page. Try various colors for the theme: dark, light, red, orange, yellow, lime, green,
   teal, blue, blurple, magenta, pink!
   -->
+  <script src="script.js"></script>
 </body>
 
 </html>
