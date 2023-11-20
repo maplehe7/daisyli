@@ -410,6 +410,32 @@ button:hover {
   justify-content: space-between;
   align-items: center;
 }
+.feature {
+  position: relative;
+}
+
+
+
+.arrow-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 24px;
+  cursor: pointer;
+  background: none;
+  border: none;
+  outline: none;
+  color: white; /* Add this line to set the text color */
+}
+
+
+#prevBtn {
+  left: 10px;
+}
+
+#nextBtn {
+  right: 10px;
+}
 
 /* Rotate first bar */
 .change .bar1 {
@@ -425,7 +451,11 @@ button:hover {
 .change .bar3 {
   transform: translate(0, -8px) rotate(45deg);
 }
-
+.videodays{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 @media only screen and (max-width: 600px) {
 
   .big_img {
