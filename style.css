@@ -41,6 +41,8 @@ p {
 .options {
   display: flex;
   flex-direction: row;
+  flex-grow: 0.2;
+  flex-wrap: wrap;
   justify-content: space-around;
   width: 40%;
   font-family: "Montserrat", sans-serif;
