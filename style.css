@@ -16,14 +16,7 @@ p {
   color: white;
 }
 
-.featured-videos {
-  display: flex;
-  height: 100vh;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
 
-}
 
 .logo {
   display: flex;
@@ -41,7 +34,7 @@ p {
 .options {
   display: flex;
   flex-direction: row;
-  flex-grow: 0.2;
+  flex-grow: 1%;
   flex-wrap: wrap;
   justify-content: space-around;
   width: 40%;
@@ -184,6 +177,7 @@ a {
   align-items: center;
   flex-direction: column;
   height: 100vh;
+  
 }
 
 .neighbor_img {
@@ -195,6 +189,9 @@ a {
   display: flex;
   justify-content: center;
   align-items: center;
+  flex-wrap: wrap;
+  
+
 }
 
 .nb {
@@ -480,11 +477,10 @@ button:hover {
   .options {
     width: 100%;
     font-size: 1.2rem;
+    flex-grow: 0;
   }
 
-  .nb_div {
-    flex-direction: column;
-  }
+
 
   /* .t_button {
     padding: 0
@@ -523,7 +519,7 @@ button:hover {
   }
 
   .neighborhoods {
-    height: 250vh;
+    height: 150vh;
   }
 
   .testimonials {
@@ -578,9 +574,7 @@ button:hover {
     flex-direction: column;
   }
 
-  .feature img {
-    width: 70%;
-  }
+
 
   .portfolio-house-img {
     width: 40vh;
@@ -601,5 +595,46 @@ button:hover {
 
   .headshot {
     border-radius: 10px;
+  }
+}
+@media only screen and (max-width: 1643px) {
+  .options{
+    flex-grow: 0.2;
+  }
+}
+@media only screen and (max-width: 1355px) {
+  .options{
+    flex-grow: 0.3;
+  }
+}
+@media only screen and (max-width: 1255px) {
+  .options{
+    flex-grow: 0.4;
+  }
+}
+@media only screen and (max-width: 1174px) {
+  .options{
+    flex-grow: 0.5;
+  }
+}
+@media only screen and (max-width: 1107px) {
+  .options{
+    flex-grow: 0.6;
+  }
+}
+@media only screen and (max-width: 1051px) {
+  .options{
+    flex-grow: 0.7;
+  }
+}
+@media only screen and (max-width: 1003px) {
+  .options{
+    flex-grow: 0.8;
+  }
+}
+@media only screen and (max-width: 923px) {
+  .fvideo{
+    width: 100vw;
+    height: 100vh;
   }
 }
