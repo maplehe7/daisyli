@@ -424,6 +424,7 @@ button:hover {
   background: none;
   border: none;
   outline: none;
+  font-size: 30px;
   color: black; /* Add this line to set the text color */
 }
 .idxf{
