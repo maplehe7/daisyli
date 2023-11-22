@@ -426,7 +426,10 @@ button:hover {
   outline: none;
   color: white; /* Add this line to set the text color */
 }
-
+.idxf{
+  height: 100vh;
+  width: 100vw;
+}
 
 #prevBtn {
   left: 10px;
