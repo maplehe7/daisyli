@@ -424,7 +424,7 @@ button:hover {
   background: none;
   border: none;
   outline: none;
-  color: white; /* Add this line to set the text color */
+  color: black; /* Add this line to set the text color */
 }
 .idxf{
   height: 100vh;
