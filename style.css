@@ -63,7 +63,7 @@ p {
   height: 100vh;
   object-fit: cover;
   z-index: -1;
-  filter: brightness(70%);
+  filter: brightness(100%);
 }
 
 
