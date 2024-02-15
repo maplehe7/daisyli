@@ -481,7 +481,7 @@ button:hover {
   .options {
     width: 100%;
     font-size: 1.2rem;
-    flex-grow: 0;
+    
   }
 
 
@@ -603,37 +603,37 @@ button:hover {
 }
 @media only screen and (max-width: 1643px) {
   .options{
-    flex-grow: 0.2;
+    flex-grow: 1;
   }
 }
 @media only screen and (max-width: 1355px) {
   .options{
-    flex-grow: 0.3;
+    flex-grow: 2;
   }
 }
 @media only screen and (max-width: 1255px) {
   .options{
-    flex-grow: 0.4;
+    flex-grow: 3;
   }
 }
 @media only screen and (max-width: 1174px) {
   .options{
-    flex-grow: 0.5;
+    flex-grow: 4;
   }
 }
 @media only screen and (max-width: 1107px) {
   .options{
-    flex-grow: 0.6;
+    flex-grow: 5;
   }
 }
 @media only screen and (max-width: 1051px) {
   .options{
-    flex-grow: 0.7;
+    flex-grow: 6;
   }
 }
 @media only screen and (max-width: 1003px) {
   .options{
-    flex-grow: 0.8;
+    flex-grow: 7;
   }
 }
 @media only screen and (max-width: 923px) {
