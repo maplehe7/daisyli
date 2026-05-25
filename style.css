@@ -1357,3 +1357,137 @@ footer p {
     aspect-ratio: 16 / 11;
   }
 }
+
+/* Section fixes: preserve the original navbar, clean up the body sections. */
+.featured-properties {
+  display: block;
+  min-height: 360px;
+  overflow: visible;
+  padding-bottom: clamp(70px, 7vw, 110px);
+  padding-top: clamp(70px, 7vw, 110px);
+  text-align: center;
+}
+
+.featured-properties > :not(.aboutdays) {
+  display: block !important;
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 1200px;
+  opacity: 1 !important;
+  visibility: visible !important;
+  width: 100%;
+}
+
+.featured-videos {
+  padding-bottom: clamp(76px, 8vw, 120px);
+  padding-top: clamp(76px, 8vw, 120px);
+}
+
+.feature {
+  max-width: 1240px;
+  width: 100%;
+}
+
+.fvideo {
+  aspect-ratio: 16 / 9;
+  border-radius: 10px;
+  height: auto !important;
+  max-width: none;
+  width: min(100%, 1120px) !important;
+}
+
+.neighborhoods {
+  background: var(--clean-dark);
+  height: auto;
+  min-height: auto;
+  padding-bottom: clamp(70px, 8vw, 115px);
+  padding-top: clamp(70px, 8vw, 115px);
+}
+
+.neighborhoods h1 {
+  margin-bottom: clamp(36px, 5vw, 64px);
+}
+
+.nb_div {
+  align-items: flex-start;
+  display: grid !important;
+  gap: clamp(24px, 2.8vw, 40px);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  max-width: 1320px;
+  width: 100%;
+}
+
+.nb_div > a {
+  display: block;
+  min-width: 0;
+  width: 100%;
+}
+
+.nb {
+  align-items: center;
+  border-radius: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: visible;
+  position: static;
+}
+
+.nb::after {
+  content: none !important;
+}
+
+.neighbor_img {
+  aspect-ratio: 4 / 3;
+  border-radius: 8px;
+  display: block;
+  height: auto;
+  margin: 0 0 16px !important;
+  object-fit: cover;
+  transition: filter 180ms ease;
+  width: 100% !important;
+}
+
+.nb:hover .neighbor_img {
+  filter: brightness(1.04);
+  transform: none;
+}
+
+.nb p {
+  bottom: auto;
+  color: white;
+  font-size: 0.95rem;
+  left: auto;
+  letter-spacing: 0.14em;
+  line-height: 1.35;
+  position: static;
+  right: auto;
+  text-align: center;
+  text-transform: uppercase;
+  z-index: auto;
+}
+
+@media only screen and (max-width: 700px) {
+  .featured-properties {
+    min-height: 260px;
+  }
+
+  .fvideo {
+    width: 100% !important;
+  }
+
+  .nb_div > a {
+    width: 100%;
+  }
+}
+
+@media only screen and (max-width: 991.98px) {
+  .nb_div {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media only screen and (max-width: 600px) {
+  .nb_div {
+    grid-template-columns: 1fr;
+  }
+}
