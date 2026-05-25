@@ -649,7 +649,7 @@ button:hover {
 
 .hero-image {
   align-items: center;
-  background-image: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)), url("https://maplehe7.github.io/daisyli/daisypic.webp");
+  background-image: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)), url("https://daisylibroker.com/wp-content/uploads/2024/02/IMG_5034.jpg");
   background-position: center;
   background-size: cover;
   box-sizing: border-box;
@@ -1489,5 +1489,91 @@ footer p {
 @media only screen and (max-width: 600px) {
   .nb_div {
     grid-template-columns: 1fr;
+  }
+}
+
+/* Strong WordPress-safe sizing overrides. */
+.featured-videos .feature {
+  max-width: 1420px !important;
+  width: 100% !important;
+}
+
+.featured-videos .feature .fvideo,
+iframe.fvideo {
+  aspect-ratio: 16 / 9;
+  display: block;
+  height: min(54vw, 742px) !important;
+  max-height: 742px !important;
+  max-width: none !important;
+  min-height: 560px;
+  width: min(96vw, 1320px) !important;
+}
+
+.neighborhoods {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+}
+
+.neighborhoods .nb_div {
+  display: grid !important;
+  gap: clamp(36px, 5vw, 64px) clamp(34px, 5vw, 64px) !important;
+  grid-template-columns: repeat(2, minmax(280px, 560px)) !important;
+  justify-content: center;
+  max-width: 1220px !important;
+  width: 100% !important;
+}
+
+.neighborhoods .nb_div > a {
+  display: block;
+  width: 100% !important;
+}
+
+.neighborhoods .nb {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  overflow: visible !important;
+  position: static !important;
+  width: 100%;
+}
+
+.neighborhoods .nb::after {
+  display: none !important;
+}
+
+.neighborhoods .neighbor_img {
+  aspect-ratio: 16 / 10;
+  border-radius: 8px;
+  height: auto !important;
+  margin: 0 0 16px !important;
+  object-fit: cover;
+  width: 100% !important;
+}
+
+.neighborhoods .nb p {
+  bottom: auto !important;
+  color: white;
+  font-size: clamp(0.95rem, 1.25vw, 1.1rem);
+  left: auto !important;
+  letter-spacing: 0.14em;
+  line-height: 1.35;
+  position: static !important;
+  right: auto !important;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+@media only screen and (max-width: 900px) {
+  .featured-videos .feature .fvideo,
+  iframe.fvideo {
+    height: calc((100vw - 40px) * 0.5625) !important;
+    max-height: none !important;
+    min-height: 0;
+    width: 100% !important;
+  }
+
+  .neighborhoods .nb_div {
+    grid-template-columns: minmax(0, 560px) !important;
   }
 }
