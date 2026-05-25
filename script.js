@@ -21,3 +21,21 @@ function changeVideo(direction) {
   // Update the src attribute of the iframe
   document.getElementById('webpage').src = videoList[currentIndex];
 }
+
+document.addEventListener('DOMContentLoaded', function () {
+  var toggler = document.querySelector('.navbar-toggler');
+  var menu = document.querySelector(toggler ? toggler.getAttribute('data-target') : '');
+
+  if (!toggler || !menu) {
+    return;
+  }
+
+  toggler.addEventListener('click', function () {
+    if (window.jQuery && window.jQuery.fn && window.jQuery.fn.collapse) {
+      return;
+    }
+
+    var isOpen = menu.classList.toggle('show');
+    toggler.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+  });
+});
