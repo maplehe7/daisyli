@@ -649,7 +649,7 @@ button:hover {
 
 .hero-image {
   align-items: center;
-  background-image: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)), url("https://daisylibroker.com/wp-content/uploads/2024/02/IMG_5034.jpg");
+  background-image: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)), url("https://maplehe7.github.io/daisyli/daisypic.webp");
   background-position: center;
   background-size: cover;
   box-sizing: border-box;
@@ -1575,5 +1575,116 @@ iframe.fvideo {
 
   .neighborhoods .nb_div {
     grid-template-columns: minmax(0, 560px) !important;
+  }
+}
+
+/* WordPress containment fixes for plugin-rendered home page sections. */
+body script,
+body style {
+  display: none !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  visibility: hidden !important;
+}
+
+.featured-properties,
+.MS_div {
+  font-size: 0 !important;
+  line-height: 0 !important;
+}
+
+.featured-properties > .aboutdays,
+.featured-properties > .aboutdays *,
+.featured-properties [class*="apexidx"],
+.featured-properties [class*="apexidx"] *,
+.featured-properties [id*="apexidx"],
+.featured-properties [id*="apexidx"] *,
+.featured-properties .owl-carousel,
+.featured-properties .owl-carousel *,
+.MS_div [class*="apexidx"],
+.MS_div [class*="apexidx"] *,
+.MS_div [id*="apexidx"],
+.MS_div [id*="apexidx"] * {
+  font-size: revert !important;
+  line-height: normal !important;
+}
+
+.testimonials {
+  overflow: hidden !important;
+  position: relative !important;
+  z-index: 2;
+}
+
+.neighborhoods {
+  box-sizing: border-box;
+  clear: both !important;
+  contain: layout paint;
+  isolation: isolate;
+  margin: 0 !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+  padding: clamp(86px, 9vw, 132px) clamp(20px, 5vw, 76px) !important;
+  position: relative !important;
+  top: auto !important;
+  transform: none !important;
+  z-index: 1;
+}
+
+.neighborhoods h1 {
+  margin: 0 0 clamp(38px, 5vw, 64px) !important;
+  padding: 0 !important;
+  position: static !important;
+  top: auto !important;
+  transform: none !important;
+}
+
+.neighborhoods .nb_div {
+  display: grid !important;
+  gap: clamp(28px, 3vw, 42px) !important;
+  grid-template-columns: repeat(4, minmax(0, 300px)) !important;
+  justify-content: center !important;
+  margin: 0 auto !important;
+  max-width: 1320px !important;
+  position: static !important;
+  top: auto !important;
+  transform: none !important;
+  width: 100% !important;
+}
+
+.neighborhoods .nb_div > a,
+.neighborhoods .nb {
+  max-width: 300px !important;
+  min-width: 0 !important;
+  width: 100% !important;
+}
+
+.neighborhoods .neighbor_img {
+  aspect-ratio: 4 / 3 !important;
+  height: auto !important;
+  max-width: 100% !important;
+  width: 100% !important;
+}
+
+@media only screen and (max-width: 1200px) {
+  .neighborhoods .nb_div {
+    grid-template-columns: repeat(2, minmax(0, 320px)) !important;
+    max-width: 720px !important;
+  }
+
+  .neighborhoods .nb_div > a,
+  .neighborhoods .nb {
+    max-width: 320px !important;
+  }
+}
+
+@media only screen and (max-width: 650px) {
+  .neighborhoods .nb_div {
+    grid-template-columns: minmax(0, 1fr) !important;
+    max-width: 360px !important;
+  }
+
+  .neighborhoods .nb_div > a,
+  .neighborhoods .nb {
+    max-width: 360px !important;
   }
 }
