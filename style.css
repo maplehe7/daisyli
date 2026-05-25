@@ -1651,6 +1651,10 @@ body style {
   width: 100% !important;
 }
 
+.neighborhoods .nb_div > p {
+  display: none !important;
+}
+
 .neighborhoods .nb_div > a,
 .neighborhoods .nb {
   max-width: 300px !important;
