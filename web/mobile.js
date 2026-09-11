@@ -54,3 +54,47 @@ function bindMobileLayout(){
 document.addEventListener('click',event=>{
   if(!event.target.closest('.site-header') && document.getElementById('main-nav')?.classList.contains('open'))closeMenu();
 });
+
+// On the homepage, reveal the navigation when the visitor reverses direction.
+(() => {
+  const header=document.querySelector('.site-header');
+  const nav=document.getElementById('main-nav');
+  let previousY=window.scrollY,travel=0,direction=0,frame=0;
+  function render(reset=false){
+    const home=document.body.classList.contains('home-page');
+    if(!home){
+      header.classList.remove('home-header-clear','home-header-hidden');
+      previousY=window.scrollY;travel=0;direction=0;return;
+    }
+    // Opening a dialog fixes the body and temporarily changes window.scrollY.
+    if(document.documentElement.classList.contains('dialog-scroll-locked'))return;
+    const y=Math.max(0,Math.min(window.scrollY,document.documentElement.scrollHeight-window.innerHeight));
+    const menuOpen=nav.classList.contains('open');
+    if(reset){previousY=y;travel=0;direction=0;header.classList.remove('home-header-hidden');}
+    header.classList.toggle('home-header-clear',y<=2&&!menuOpen);
+    if(y<=2||menuOpen){
+      header.classList.remove('home-header-hidden');travel=0;direction=0;
+    }else{
+      const delta=y-previousY,nextDirection=Math.sign(delta);
+      if(nextDirection&&nextDirection!==direction){travel=0;direction=nextDirection;}
+      travel+=Math.abs(delta);
+      if(travel>=6){header.classList.toggle('home-header-hidden',direction>0);travel=0;}
+    }
+    previousY=y;
+  }
+  window.addEventListener('scroll',()=>{
+    if(frame)return;
+    frame=requestAnimationFrame(()=>{frame=0;render();});
+  },{passive:true});
+  header.addEventListener('focusin',()=>header.classList.remove('home-header-hidden'));
+  window.addEventListener('pageshow',()=>render(true));
+  window.addEventListener('resize',()=>render(true));
+  const observer=new MutationObserver(records=>{
+    if(records.some(record=>record.target!==nav||
+      String(record.oldValue).split(/\s+/).includes('open')!==nav.classList.contains('open')))render(true);
+  });
+  observer.observe(document.body,{attributes:true,attributeFilter:['class']});
+  observer.observe(document.documentElement,{attributes:true,attributeFilter:['class']});
+  observer.observe(nav,{attributes:true,attributeFilter:['class'],attributeOldValue:true});
+  render(true);
+})();

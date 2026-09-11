@@ -97,3 +97,22 @@ html[lang=zh-Hans] .home-intro .hero-copy h1{font-size:clamp(52px,5.2vw,72px);li
   .home-intro .hero-copy .home-region{margin-top:10px}
   .home-search-field input[type=search],.home-intro .home-search-button{height:44px;min-height:44px}
 }
+
+/* Let the film fill the opening behind the homepage navigation. */
+.home-page .home-intro{min-height:100dvh;padding-top:calc(clamp(56px,9svh,100px) + var(--safe-top,0px))}
+.home-page .site-header{
+  position:fixed;inset:0 0 auto;width:100%;
+  transition:transform .24s ease,background-color .2s ease,color .2s ease;
+}
+.home-page .site-header.home-header-hidden{transform:translateY(-100%);pointer-events:none}
+.home-page .site-header.home-header-clear{background:transparent;color:#fff;border-color:transparent;box-shadow:none}
+.home-page .home-header-clear .brand img{filter:invert(1)}
+.home-page .home-header-clear .brand>span,.home-page .home-header-clear #main-nav>a{text-shadow:0 1px 4px #0008}
+.home-page .home-header-clear #main-nav{background:transparent;border-color:transparent}
+.home-page .home-header-clear #main-nav>a:not(.nav-contact)::after{background:currentColor}
+.home-page .home-header-clear #main-nav .nav-contact{border-color:#ffffffa6}
+.home-page .home-header-clear #main-nav .nav-contact:hover{background:#ffffff20}
+.home-page .home-header-clear .menu-toggle,.home-page .home-header-clear .language-switch,.home-page .home-header-clear .language-switch button{color:#fff}
+.home-page .home-header-clear .menu-toggle span{background:#fff}
+.home-page .home-header-clear a:focus-visible,.home-page .home-header-clear button:focus-visible{outline-color:#fff}
+@media(prefers-reduced-motion:reduce){.home-page .site-header{transition:none}}
