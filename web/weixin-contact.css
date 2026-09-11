@@ -14,7 +14,7 @@
 .weixin-qr-open:hover{border-color:#203831;box-shadow:0 4px 12px #20383120}
 /* Frame the QR and its white margin from the unmodified 888 × 1137 photo. */
 .weixin-qr-image{position:relative;display:block;width:100%;aspect-ratio:1;overflow:hidden;background:#fff}
-.weixin-qr-image .weixin-profile-qr{position:absolute;width:134.545455%;max-width:none;height:auto;left:-17.272727%;top:-42.727273%}
+.weixin-qr-image .weixin-profile-qr{position:absolute;width:134.545455%;max-width:none;height:auto;left:-17.272727%;top:-42.727273%;filter:grayscale(1) brightness(.6) contrast(10)}
 .weixin-qr-cue{display:flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:10px 8px;background:#eaf0ec;border-top:1px solid #d6e0d9;font-size:14px;font-weight:600}
 .weixin-qr-cue svg{width:18px;height:18px}
 .weixin-qr-placeholder{width:100%;aspect-ratio:1;border:1px dashed #b8c8bb;border-radius:4px;display:grid;place-items:center;background:#fff;color:#91a195}
@@ -29,6 +29,9 @@
 .weixin-qr-close{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:44px;padding:6px 12px;border:1px solid #b9c7bf;border-radius:6px;background:#f4f7f5;font-size:14px}
 .weixin-qr-close>span:first-child{font-size:26px;line-height:1}
 .weixin-qr-account{text-align:center;margin-top:12px;font-size:16px;font-weight:600;overflow-wrap:anywhere}
+@media(min-width:901px){
+  .original-contact .contact-original-photo{width:min(100%,360px);justify-self:center;align-self:start}
+}
 @media(min-width:1200px){
   .original-contact .contact-copy{display:grid;grid-template-columns:minmax(0,1fr) clamp(192px,16vw,224px);grid-template-rows:auto auto auto auto 1fr;column-gap:24px}
   .original-contact .contact-copy h1,.original-contact .contact-license{grid-column:1 / -1}
