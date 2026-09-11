@@ -7,6 +7,7 @@ if (daisy_site_path() === '/account') { $html=str_replace('<head>', '<head><meta
 // Keep the site's WordPress integrations while the reviewed styles load last.
 ob_start(); wp_head(); $head=ob_get_clean();
 $head=preg_replace('~<title>.*?</title>~si', '', $head);
+$head=preg_replace('~<meta[^>]+name=["\']viewport["\'][^>]*>~i', '', $head);
 $head=preg_replace('~<style[^>]*id=["\']wp-admin-bar-inline-css["\'][^>]*>.*?</style>~si', '', $head);
 $html=str_replace('<head>', '<head>' . $head, $html);
 ob_start(); wp_footer(); $footer=ob_get_clean();

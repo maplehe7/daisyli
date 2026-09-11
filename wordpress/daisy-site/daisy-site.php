@@ -2,12 +2,12 @@
 /**
  * Plugin Name: Daisy Li Site
  * Description: Daisy Li's approved website, property search, and account integration.
- * Version: 1.0.0
+ * Version: 1.0.1
  * Author: Daisy Li
  * Requires PHP: 8.0
  */
 if (!defined('ABSPATH')) { exit; }
-define('DAISY_SITE_VERSION', '1.0.0');
+define('DAISY_SITE_VERSION', '1.0.1');
 require_once __DIR__ . '/idx-api.php';
 
 function daisy_site_path() { return '/' . trim((string) wp_parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH), '/'); }

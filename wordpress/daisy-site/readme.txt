@@ -1,7 +1,7 @@
 === Daisy Li Site ===
 Contributors: maplehe7
 Requires PHP: 8.0
-Stable tag: 1.0.0
+Stable tag: 1.0.1
 
 Daisy Li's reviewed English and Chinese website with the existing property-search provider.
 

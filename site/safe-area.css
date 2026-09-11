@@ -1,0 +1,27 @@
+/* Fill Safari's screen edges; keep header controls below the sensor area. */
+:root{
+  --safe-top:env(safe-area-inset-top,0px);
+  --safe-bottom:env(safe-area-inset-bottom,0px);
+  --header-content-height:94px;
+}
+html{background:var(--ink,#203831)}
+.site-header{
+  height:calc(var(--header-content-height) + var(--safe-top));
+  padding-top:var(--safe-top);
+}
+.home-page .site-header{
+  --header-content-height:var(--home-header-height);
+  height:calc(var(--home-header-height) + var(--safe-top));
+}
+.home-intro{min-height:calc(100dvh - var(--home-header-height) - var(--safe-top))}
+.site-footer{padding-bottom:var(--safe-bottom)}
+@media(max-width:900px){
+  :root{--header-content-height:80px}
+  .site-header #main-nav,.home-page #main-nav{
+    top:100%;
+    max-height:calc(100svh - var(--header-content-height) - var(--safe-top) - var(--safe-bottom) - 8px);
+  }
+}
+@media(max-width:767px){
+  :root{--header-content-height:70px}
+}

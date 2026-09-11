@@ -18,7 +18,7 @@ function copy(directory, target) {
         .replaceAll('/api/idx/', '/wp-json/daisy/v1/idx/');
       if (file.name === 'index.html') {
         text = text.replace(/\s*<meta name="robots" content="noindex,nofollow">/, '');
-        for (const asset of rootAssets) text = text.replaceAll('"/' + asset + '"', '"' + base + asset + '?v=1.0.0"');
+        for (const asset of rootAssets) text = text.replaceAll('"/' + asset + '"', '"' + base + asset + '?v=1.0.1"');
       }
       fs.writeFileSync(to, text);
     } else fs.copyFileSync(from, to);
