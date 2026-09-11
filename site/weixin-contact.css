@@ -31,17 +31,16 @@
 .weixin-qr-account{text-align:center;margin-top:12px;font-size:16px;font-weight:600;overflow-wrap:anywhere}
 .original-contact .contact-original-photo img{width:100%;height:auto;aspect-ratio:1;border-radius:50%;object-fit:cover}
 @media(min-width:901px){
-  .original-contact .contact-original-photo{width:min(100%,360px);justify-self:center;align-self:start}
-}
-@media(min-width:1200px){
-  .original-contact .contact-copy{display:grid;grid-template-columns:minmax(0,1fr) 160px;grid-template-rows:auto auto auto auto 1fr;column-gap:32px}
-  .original-contact .contact-copy h1,.original-contact .contact-license{grid-column:1 / -1}
-  .original-contact .contact-detail{grid-column:1;min-width:0}
-  .original-contact .contact-detail>a{font-size:18px;gap:12px}
-  .original-contact .contact-weixin{display:contents}
-  .original-contact .weixin-controls{grid-column:1;grid-row:5;align-self:start;justify-self:start;width:100%;max-width:260px;margin-top:28px}
-  .original-contact .weixin-qr{grid-column:2;grid-row:3 / 6;align-self:start;width:100%;margin-top:0;transform:translate(96px,-56px)}
+  .contact-page.original-contact{width:min(1000px,calc(100% - 80px));grid-template-columns:minmax(260px,300px) 160px minmax(240px,280px);grid-template-rows:auto auto auto auto 1fr;justify-content:center;gap:0 40px;align-items:start;padding-block:48px 64px}
+  .original-contact .contact-copy,.original-contact .contact-weixin{display:contents}
+  .original-contact .contact-copy h1{grid-column:1 / -1;grid-row:1;font-size:56px;margin:0 0 14px}
+  .original-contact .contact-license{grid-column:1 / -1;grid-row:2;margin:0 0 28px}
+  .original-contact .contact-detail{grid-column:1;min-width:0;align-self:start;margin:0 0 20px}
+  .original-contact .contact-detail>a{font-size:17px;gap:12px}
+  .original-contact .weixin-controls{grid-column:1;grid-row:5;align-self:start;width:240px;max-width:100%;margin:0}
+  .original-contact .weixin-qr{grid-column:2;grid-row:3 / 6;align-self:start;width:160px;margin:0}
   .original-contact .weixin-qr-userid{font-size:20px}
+  .original-contact .contact-original-photo{grid-column:3;grid-row:3 / 6;width:100%;max-width:280px;align-self:start;justify-self:center;margin:0}
 }
 @media(max-width:900px){
   .contact-page.original-contact{width:calc(100% - 40px);max-width:560px;grid-template-columns:minmax(0,1fr) clamp(72px,20vw,88px);gap:0 16px;padding-block:28px 40px;align-items:start}
