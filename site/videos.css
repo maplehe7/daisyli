@@ -50,7 +50,8 @@
 @media(prefers-reduced-motion:reduce){.video-thumbnail>img{transition:none}}
 
 .home-intro>.hero-film{overflow:hidden}
-.home-intro>.hero-film>.hero-film-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;opacity:0;transition:opacity .2s}
+/* Override the legacy WordPress rule that hides every video with !important. */
+.home-intro>.hero-film>.hero-film-video{display:block!important;position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;opacity:0;transition:opacity .2s}
 .home-intro>.hero-film>.hero-film-video.is-playing{opacity:1}
 .home-intro>.hero-film>.hero-film-poster{object-position:center}
 .hero-film-toggle{position:absolute;top:20px;right:24px;z-index:2;display:grid;place-items:center;width:44px;height:44px;padding:10px;border:1px solid #ffffff80;border-radius:50%;background:#18362b99;color:#fff;backdrop-filter:blur(8px)}
