@@ -162,7 +162,7 @@ html[lang=zh-Hans] .about-hero p,html[lang=zh-Hans] .community-story p{line-heig
 
 /* Larger monogram, with consistent capitals throughout the header. */
 .site-header .brand>span,.site-header #main-nav{font-family:var(--sans);font-weight:500;text-transform:uppercase;letter-spacing:1px}
-.site-header .brand>span{white-space:nowrap}
+.site-header .brand>span{white-space:nowrap;font-weight:700}
 .site-header .brand img{width:76px;height:76px;flex-shrink:0}
 .site-header #main-nav{font-size:13px;gap:22px}
 @media(min-width:901px) and (max-width:1200px){
