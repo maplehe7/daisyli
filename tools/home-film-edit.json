@@ -1,0 +1,59 @@
+{
+  "sources": [
+    {
+      "vimeoId": "1072573097",
+      "clips": [
+        [
+          9,
+          20
+        ],
+        [
+          28,
+          190
+        ]
+      ],
+      "title": "48 Panorama",
+      "availableResolution": "1920x1080"
+    },
+    {
+      "vimeoId": "584055906",
+      "clips": [
+        21,
+        205
+      ],
+      "title": "102 Nest Pine",
+      "availableResolution": "1280x720"
+    },
+    {
+      "vimeoId": "1182450083",
+      "clips": [
+        [
+          6,
+          30
+        ],
+        [
+          39,
+          195
+        ]
+      ],
+      "title": "8 Panorama",
+      "availableResolution": "1920x1080"
+    }
+  ],
+  "output": {
+    "codec": "H.264",
+    "crf720": 19,
+    "crf1080": 18,
+    "audio": false,
+    "renditions": [
+      "1920x1080",
+      "1280x720"
+    ],
+    "hlsJsVersion": "1.7.2",
+    "framesPerSecond": 48,
+    "speed": 2,
+    "durationSeconds": 268.5,
+    "speedBakedIntoFile": true,
+    "segmentSeconds": 4
+  }
+}

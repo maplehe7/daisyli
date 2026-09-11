@@ -208,6 +208,7 @@ window.DaisyVideos = (() => {
   }
 
   function bind() {
+    window.DaisyHeroVideo?.bind();
     observer?.disconnect();
     clearTimeout(preloadTimer);
     if (dialog.open) dialog.close();
@@ -244,5 +245,124 @@ window.DaisyVideos = (() => {
     }
     if (event.target.closest('[data-video-retry]')) open(selectedId);
   });
+  return {render, bind};
+})();
+
+/* The five approved clips are already trimmed, joined, and rendered at 2x. */
+window.DaisyHeroVideo = (() => {
+  const assetRoot = '/assets/home-film-v1/';
+  const pauseIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14M16 5v14"/></svg>';
+  const playIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 11 7-11 7Z"/></svg>';
+  let loader, dispose;
+
+  function render() {
+    return `<div class="hero-photo hero-film"><img class="hero-film-poster" src="${assetRoot}poster.jpg" alt="" fetchpriority="high" width="1920" height="1080"><video class="hero-film-video" muted autoplay loop playsinline preload="metadata" poster="${assetRoot}poster.jpg" aria-hidden="true" disablepictureinpicture></video></div><button type="button" class="hero-film-toggle" aria-label="Pause background video">${pauseIcon}</button>`;
+  }
+
+  function loadHLS() {
+    if (window.Hls) return Promise.resolve(window.Hls);
+    if (!loader) loader = new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = '/vendor/hls/hls.light.min.js';
+      script.onload = () => resolve(window.Hls);
+      script.onerror = () => { script.remove(); loader = null; reject(new Error('Video player unavailable')); };
+      document.head.append(script);
+    });
+    return loader;
+  }
+
+  function bind() {
+    dispose?.();
+    dispose = null;
+    const intro = document.querySelector('.home-intro');
+    if (intro && !intro.querySelector('.hero-film-video')) {
+      intro.querySelector(':scope > .hero-photo').outerHTML = render();
+      intro.querySelector('.hero-photo-caption')?.remove();
+    }
+    const video = document.querySelector('.hero-film-video');
+    const toggle = document.querySelector('.hero-film-toggle');
+    if (!video || !toggle) return;
+    const motion = matchMedia('(prefers-reduced-motion: reduce)');
+    const events = new AbortController();
+    const on = (target, event, handler) => target.addEventListener(event, handler, {signal:events.signal});
+    let hls, pending, started = false, disposed = false, visible = true, paused = motion.matches;
+    let recovery = 0;
+    video.muted = true;
+    video.defaultMuted = true;
+    video.autoplay = !paused;
+
+    function updateControl() {
+      const chinese = typeof siteLanguage !== 'undefined' && siteLanguage === 'zh';
+      toggle.innerHTML = paused ? playIcon : pauseIcon;
+      toggle.setAttribute('aria-label', paused
+        ? (chinese ? '播放背景视频' : 'Play background video')
+        : (chinese ? '暂停背景视频' : 'Pause background video'));
+      toggle.setAttribute('aria-pressed', String(paused));
+    }
+
+    async function prepare() {
+      if (started || disposed) return;
+      if (pending) return pending;
+      pending = (async () => {
+        const source = assetRoot + 'index.m3u8';
+        const nativeHLS = video.canPlayType('application/vnd.apple.mpegurl');
+        const safari = /Safari/i.test(navigator.userAgent) && !/Chrome|Chromium|Android/i.test(navigator.userAgent);
+        if (nativeHLS && safari) {
+          video.src = source;
+        } else {
+          const Hls = await loadHLS();
+          if (disposed) return;
+          if (!Hls?.isSupported()) {
+            if (!nativeHLS) throw new Error('Streaming is unavailable');
+            video.src = source; started = true; return;
+          }
+          hls = new Hls({startLevel:navigator.connection?.saveData ? 0 : 1, maxBufferLength:16, backBufferLength:12, maxMaxBufferLength:24, capLevelToPlayerSize:false});
+          hls.on(Hls.Events.ERROR, (_, data) => {
+            if (!data.fatal || disposed) return;
+            if (data.type === Hls.ErrorTypes.MEDIA_ERROR && recovery++ === 0) hls.recoverMediaError();
+            else {
+              hls.destroy(); hls = null; started = false;
+              video.classList.remove('is-playing');
+              paused = true; updateControl();
+            }
+          });
+          hls.loadSource(source);
+          hls.attachMedia(video);
+        }
+        started = true;
+      })().finally(() => { pending = null; });
+      return pending;
+    }
+
+    async function resume() {
+      if (paused || disposed || !visible || document.hidden) return;
+      try {
+        await prepare();
+        if (paused || disposed || !visible || document.hidden) { hls?.stopLoad(); return; }
+        hls?.startLoad(-1);
+        await video.play();
+      } catch {
+        if (!disposed && !document.hidden && visible && !paused) { paused = true; updateControl(); }
+      }
+    }
+
+    function sync() {
+      if (paused || document.hidden || !visible) { video.pause(); hls?.stopLoad(); }
+      else resume();
+    }
+    on(toggle, 'click', () => { paused = !paused; video.autoplay = !paused; updateControl(); sync(); });
+    on(video, 'playing', () => { video.classList.add('is-playing'); });
+    on(video, 'error', () => { video.classList.remove('is-playing'); paused = true; updateControl(); });
+    on(document, 'visibilitychange', sync);
+    on(motion, 'change', () => { paused = motion.matches; updateControl(); sync(); });
+    const viewport = new IntersectionObserver(entries => { visible = entries[0].isIntersecting; sync(); }, {threshold:0.01});
+    viewport.observe(video.closest('.home-intro'));
+    updateControl();
+    sync();
+    dispose = () => {
+      disposed = true; events.abort(); viewport.disconnect();
+      video.pause(); hls?.destroy(); video.removeAttribute('src'); video.load();
+    };
+  }
   return {render, bind};
 })();
