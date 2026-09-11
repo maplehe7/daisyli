@@ -105,7 +105,7 @@ html[lang=zh-Hans] .home-intro .hero-copy h1{font-size:clamp(52px,5.2vw,72px);li
   transition:transform .24s ease,background-color .2s ease,color .2s ease;
 }
 .home-page .site-header.home-header-hidden{transform:translateY(-100%);pointer-events:none}
-.home-page .site-header.home-header-clear{background:linear-gradient(180deg,#0000001a,#0000000a 72%,#00000000);color:#fff;border-color:transparent;box-shadow:none}
+.home-page .site-header.home-header-clear{background:linear-gradient(180deg,#0000001a,#0000000a 72%,#00000000);color:#fff;border:0;box-shadow:none}
 .home-page .home-header-clear .brand img{filter:invert(1)}
 .home-page .home-header-clear .brand>span,.home-page .home-header-clear #main-nav>a{text-shadow:0 1px 4px #0008}
 .home-page .home-header-clear #main-nav{background:transparent;border-color:transparent}
