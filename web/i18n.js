@@ -13,7 +13,7 @@ const originalTextNodes=new WeakMap();
 const originalAttributes=new WeakMap();
 const chineseUI={
   'Portfolio':'房产案例','San Diego':'圣迭戈','Rancho Santa Margarita':'兰乔圣玛格丽塔',
-  'Broker':'房地产经纪人','Orange County Real Estate':'橙县房地产','Search':'搜索','Search by Address, City, or Neighborhood':'按地址、城市或社区搜索','Address, City, or Neighborhood':'地址、城市或社区',
+  'Broker':'房地产经纪人','Orange County Real Estate':'橙县房地产','Search':'搜索','Search by Address, City, or ZIP code':'按地址、城市或邮政编码搜索','Address, City, or ZIP code':'地址、城市或邮政编码',
   'Text Me':'发短信联系我','Message on Weixin':'微信联系','Weixin QR code':'微信二维码',"Daisy Li's Weixin QR code":'Daisy Li 的微信二维码','Weixin ID':'微信号','Copy':'复制',
   'Tap to enlarge':'点击放大','Enlarge Weixin QR code':'放大微信二维码','Close QR code':'关闭二维码','Close':'关闭',
   'Skip to content':'跳至内容','DESIGN PREVIEW':'设计预览','Your live site is unchanged.':'正式网站尚未更改。',
