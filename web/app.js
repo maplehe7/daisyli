@@ -8,6 +8,13 @@ headerBrand.querySelector('span').textContent = 'Daisy Li, Broker';
 headerBrand.querySelector('img').src = 'https://maplehe7.github.io/daisyli/web/assets/daisylogo_black.png';
 document.querySelectorAll('meta[name="theme-color"]').forEach(meta => meta.content = '#ffffff');
 document.querySelector('#main-nav a[href="/account"]')?.remove();
+if(!document.querySelector('#main-nav .nav-phone')){
+  const phoneLink=document.createElement('a');
+  phoneLink.className='nav-phone';
+  phoneLink.href='tel:+19498610160';
+  phoneLink.textContent='(949) 861-0160';
+  document.getElementById('main-nav').append(phoneLink);
+}
 document.querySelectorAll('a[href="/testimonials"]').forEach(link=>link.setAttribute('href','/#testimonials'));
 const arrow = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h15m-6-6 6 6-6 6"/></svg>';
 const diagonal = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 18 18 6M6 6h12v12"/></svg>';

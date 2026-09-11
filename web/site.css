@@ -164,23 +164,27 @@ html[lang=zh-Hans] .about-hero p,html[lang=zh-Hans] .community-story p{line-heig
 .site-header .brand>span,.site-header #main-nav{font-family:var(--sans);font-weight:500;text-transform:uppercase;letter-spacing:1px}
 .site-header .brand>span{white-space:nowrap;font-family:'Marcellus',Georgia,serif;font-weight:400}
 .site-header .brand img{width:76px;height:76px;flex-shrink:0}
-.site-header #main-nav{font-size:16px;gap:20px}
+.site-header #main-nav{font-size:14px;font-weight:700;gap:28px;letter-spacing:1.1px}
+.site-header #main-nav .nav-phone{font-variant-numeric:tabular-nums}
 @media(min-width:1201px) and (max-width:1350px){
-  .site-header #main-nav{font-size:14.5px;gap:14px;letter-spacing:.6px}
+  .site-header #main-nav{font-size:13.5px;gap:20px;letter-spacing:.7px}
 }
 @media(min-width:901px) and (max-width:1200px){
   .site-header .brand{gap:10px}
   .site-header .brand img{width:64px;height:64px}
   .site-header .brand>span{font-size:22px;letter-spacing:.6px}
-  .site-header #main-nav{font-size:14px;gap:8px;letter-spacing:.2px}
+  .site-header #main-nav{font-size:13px;column-gap:16px;row-gap:0;letter-spacing:.6px;flex-wrap:wrap;justify-content:flex-end}
   .site-header #main-nav .nav-contact{padding-inline:12px;gap:10px}
+  .site-header #main-nav .nav-phone{order:-1;flex-basis:100%;text-align:right;padding-block:0 4px}
+  .site-header #main-nav .nav-phone::after{left:auto;right:0}
+  .site-header #main-nav .nav-phone:hover::after{width:140px}
 }
 @media(min-width:901px) and (max-width:1024px){
-  .site-header #main-nav{font-size:12.5px;gap:6px;letter-spacing:.2px}
+  .site-header #main-nav{font-size:12.5px;column-gap:14px;letter-spacing:.4px}
 }
 @media(max-width:900px){
   .site-header .brand img{width:60px;height:60px}
-  .site-header #main-nav{font-size:18px;gap:5px}
+  .site-header #main-nav{font-size:16px;gap:9px}
 }
 @media(max-width:767px){
   .site-header .brand img{width:48px;height:48px}
