@@ -1,4 +1,9 @@
 'use strict';
+// Keep the existing WordPress entry page in sync with the hosted header assets.
+const headerBrand = document.querySelector('.site-header .brand');
+headerBrand.querySelector('span').textContent = 'Daisy Li, Broker';
+headerBrand.querySelector('img').src = '/assets/daisylogo_black.png';
+document.querySelectorAll('meta[name="theme-color"]').forEach(meta => meta.content = '#ffffff');
 const arrow = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h15m-6-6 6 6-6 6"/></svg>';
 const diagonal = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 18 18 6M6 6h12v12"/></svg>';
 const heart = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z"/></svg>';
@@ -29,7 +34,7 @@ function checkbox(name,label,value='yes',checked=false){return `<label class="ch
 function cityOptions(){return [['','All four communities'],...places.map(p=>[p.name,p.name])];}
 function priceOptions(){return [['','Any price'],...[500000,750000,1000000,1500000,2000000,2500000,3000000,4000000,5000000,7500000,10000000,20000000].map(n=>[n,money(n)])];}
 function quickSearch(){return `<form id="quick-search" class="quick-search">${select('city','Location',cityOptions())}${select('max','Price range',[['','Any price'],[1500000,'Up to $1.5M'],[2500000,'Up to $2.5M'],[5000000,'Up to $5M'],[10000000,'Up to $10M']])}${select('beds','Bedrooms',[['','Any bedrooms'],[2,'2+ bedrooms'],[3,'3+ bedrooms'],[4,'4+ bedrooms'],[5,'5+ bedrooms']])}<button class="button" type="submit">Find a home ${arrow}</button></form>`;}
-function home(){return `<div class="home-intro"><div class="hero-photo"><img src="/assets/property-${heroId}.jpg" alt="2 Havenhurst Drive, a Spanish-style estate in Coto de Caza" fetchpriority="high" width="1024" height="683"></div><section class="home-hero wrap"><div class="hero-copy"><h1>Turning dream<br> homes into<br> <em>reality</em></h1><a class="text-link" href="/about">About Daisy ${arrow}</a></div></section><div class="wrap search-strip">${quickSearch()}<a href="/property/${heroId}" class="hero-photo-caption"><span>2 Havenhurst Drive <small>Coto de Caza</small></span>${diagonal}</a></div></div>
+function home(){return `<div class="home-intro"><div class="hero-photo"><img src="/assets/property-${heroId}.jpg" alt="2 Havenhurst Drive, a Spanish-style estate in Coto de Caza" fetchpriority="high" width="1024" height="683"></div><section class="home-hero wrap"><div class="hero-copy"><a class="text-link" href="/about">About Daisy ${arrow}</a></div></section><div class="wrap search-strip">${quickSearch()}<a href="/property/${heroId}" class="hero-photo-caption"><span>2 Havenhurst Drive <small>Coto de Caza</small></span>${diagonal}</a></div></div>
 <section class="section wrap"><div class="section-heading"><div><h2>Featured Properties</h2></div><a class="text-link" href="/featured">Featured Homes ${arrow}</a></div><div class="property-grid" id="home-live-listings">${idxLoading()}</div></section>
 <section class="about-intro"><div class="wrap about-grid"><div class="portrait-frame"><img src="/assets/daisy-portrait.jpeg" alt="Daisy Li, Orange County real estate broker" width="500" height="540" loading="lazy"></div><div class="about-copy"><h2>About Daisy</h2><p>${escapeHTML(siteLanguage==='zh'?chineseContent.homeBio:originalContent.homeBio)}</p><a class="text-link" href="/about">LEARN MORE ${arrow}</a></div></div></section>
 <section class="section wrap"><div class="section-heading"><div><h2>Neighborhoods</h2></div><a class="text-link" href="/neighborhoods">Neighborhoods ${arrow}</a></div><div class="community-grid">${places.map(communityCard).join('')}</div></section>

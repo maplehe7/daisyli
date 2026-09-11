@@ -116,18 +116,17 @@ html[lang=zh-Hans] .about-hero p,html[lang=zh-Hans] .community-story p{line-heig
 @media(max-width:360px){.site-header{padding-inline:12px;gap:6px}.site-header .brand>span{font-size:21px;letter-spacing:1.4px}.site-header .brand img{width:28px;height:28px}.site-header .brand{gap:6px}.language-switch{gap:3px}.language-switch button{min-width:36px}.menu-toggle{min-width:36px}.hero-copy h1{font-size:48px}html[lang=zh-Hans] .hero-copy h1{font-size:32px}.quick-search select{font-size:14px}}
 @media(max-width:360px){.search-strip .quick-search{grid-template-columns:1fr;gap:10px}.quick-search .field:nth-child(2){padding:0 0 9px!important;border-right:0!important;border-bottom:1px solid var(--line)!important}.quick-search .field:nth-child(3){padding:0!important}.quick-search select{font-size:15px}}
 
-/* Dark navigation, including the expanded mobile menu. */
-.site-header{background:var(--ink);color:#f7f8f3;border-color:#3c5549}
-.site-header #main-nav{background:var(--ink);border-color:#3c5549}
-.site-header #main-nav>a:not(.nav-contact)::after{background:#d5e2cb}
-.site-header #main-nav .nav-contact{border-color:#82998e}
-.site-header #main-nav .nav-contact:hover{background:#344f44}
-.site-header .language-switch{color:#b6c9bb}
-.site-header .language-switch button{color:#c9d8cd}
-.site-header .language-switch button[aria-pressed=true],.site-header .language-switch button:hover{color:#f7f8f3}
-.site-header .menu-toggle{color:#f7f8f3}
-.site-header .menu-toggle span{background:#f7f8f3}
-.site-header a:focus-visible,.site-header button:focus-visible{outline-color:#d5e2cb}
+/* White navigation, including the expanded mobile menu. */
+.site-header{background:#fff;color:var(--ink);border-color:var(--line);backdrop-filter:none}
+.site-header #main-nav{background:#fff;border-color:var(--line)}
+.site-header #main-nav>a:not(.nav-contact)::after{background:var(--ink)}
+.site-header #main-nav .nav-contact{border-color:#a8b6ad}
+.site-header #main-nav .nav-contact:hover{background:var(--soft)}
+.site-header .language-switch,.site-header .language-switch button{color:var(--ink)}
+.site-header .language-switch button[aria-pressed=true],.site-header .language-switch button:hover{color:#000}
+.site-header .menu-toggle{color:var(--ink)}
+.site-header .menu-toggle span{background:var(--ink)}
+.site-header a:focus-visible,.site-header button:focus-visible{outline-color:var(--ink)}
 
 /* Reserve the display serif for the homepage headline. */
 .home-intro .hero-copy h1{font-family:var(--serif)}
@@ -159,4 +158,32 @@ html[lang=zh-Hans] .about-hero p,html[lang=zh-Hans] .community-story p{line-heig
 @media(max-width:767px){
   .catalogue-section .listing-toolbar,
   .catalogue-section .toolbar-filters>.text-link{border-bottom:0}
+}
+
+/* Larger monogram, with consistent capitals throughout the header. */
+.site-header .brand>span,.site-header #main-nav{font-family:var(--sans);font-weight:500;text-transform:uppercase;letter-spacing:1px}
+.site-header .brand>span{white-space:nowrap}
+.site-header .brand img{width:76px;height:76px;flex-shrink:0}
+.site-header #main-nav{font-size:13px;gap:22px}
+@media(min-width:901px) and (max-width:1200px){
+  .site-header .brand{gap:10px}
+  .site-header .brand img{width:64px;height:64px}
+  .site-header .brand>span{font-size:22px;letter-spacing:.6px}
+  .site-header #main-nav{font-size:12px;gap:12px;letter-spacing:.5px}
+  .site-header #main-nav .nav-contact{padding-inline:12px;gap:10px}
+}
+@media(min-width:901px) and (max-width:1024px){
+  .site-header #main-nav{font-size:11.5px;gap:8px;letter-spacing:.3px}
+}
+@media(max-width:900px){
+  .site-header .brand img{width:60px;height:60px}
+  .site-header #main-nav{font-size:16px;gap:5px}
+}
+@media(max-width:767px){
+  .site-header .brand img{width:48px;height:48px}
+  .site-header .brand>span{font-size:20px;letter-spacing:.7px}
+}
+@media(max-width:360px){
+  .site-header .brand img{width:44px;height:44px}
+  .site-header .brand>span{font-size:18px;letter-spacing:.5px}
 }
