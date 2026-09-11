@@ -10,8 +10,59 @@ window.DaisyProperty=(()=>{
     .replace(/([a-z0-9])([A-Z])/g,'$1 $2')
     .replace(/([A-Z])([A-Z][a-z])/g,'$1 $2')
     .trim();
-  function inquiry(p){return `<aside class="property-inquiry"><div class="inquiry-agent"><img src="/assets/daisy-portrait.jpeg" alt="Daisy Li"><div><h2>Daisy Li</h2><a href="tel:+19498610160">(949) 861-0160</a></div></div><form id="property-inquiry-form"><h3>Request information</h3>${DaisyAccount.field('name','Name',{required:true,autocomplete:'name'},'inquiry')}${DaisyAccount.field('email','Email',{required:true,type:'email',autocomplete:'email'},'inquiry')}${DaisyAccount.field('phone','Phone',{type:'tel',autocomplete:'tel'},'inquiry')}<label class="field" for="inquiry-message"><span>Message</span><textarea name="message" id="inquiry-message" rows="4" maxlength="4000" required></textarea></label><label class="check"><input type="checkbox" name="showing"><span>Request a showing</span></label><div id="showing-fields" hidden><label class="field" for="inquiry-date"><span>Preferred date</span><input type="date" id="inquiry-date" name="date" min="${new Date().toLocaleDateString('en-CA')}"></label>${select('response','Response requested',[['Immediately','Immediately'],['In the next week','In the next week']])}</div><p class="form-message" role="status"></p><div class="inquiry-actions"><button type="submit" name="delivery" value="sms" class="button">Send text ${arrow}</button><button type="submit" name="delivery" value="email" class="text-link">Send email</button></div></form></aside>`;}
-  function calculator(p){return `<details class="property-calculator"><summary>Mortgage calculator</summary><form id="mortgage-form"><div class="fields-grid two">${DaisyAccount.field('price','Price',{type:'number',value:p.price},'mortgage')}${DaisyAccount.field('down','Down payment',{type:'number',value:Math.round(p.price*.2)},'mortgage')}${DaisyAccount.field('rate','Interest rate (%)',{type:'number',required:true},'mortgage')}${select('term','Loan term',[['30','30 years'],['20','20 years'],['15','15 years']])}${DaisyAccount.field('tax','Annual property tax',{type:'number',value:0},'mortgage')}${DaisyAccount.field('insurance','Annual insurance',{type:'number',value:0},'mortgage')}${DaisyAccount.field('hoa','Monthly HOA',{type:'number',value:num(p.raw.HOAFee1)},'mortgage')}</div><p class="form-message" role="status"></p><button class="button button-outline" type="submit">Calculate</button><output id="mortgage-result" aria-live="polite"></output></form></details>`;}
+  const featureAliases={
+    'Garage Faces Side':'Side-facing garage','Garage Faces Front':'Front-facing garage','Garage Faces Rear':'Rear-facing garage',
+    'Door Multi':'Multiple garage doors','Door Single':'Single garage door',
+    'Front Porch Patio':'Front Porch','Custom Coverings':'Custom Window Coverings','Double Pane Windows':'Double-Pane Windows',
+    'Fireplace Primary Bedroom':'Primary Bedroom Fireplace','Fireplace Family Room':'Family Room Fireplace','Fireplace Living Room':'Living Room Fireplace',
+    'Walk In Pantry':'Walk-in Pantry','Mountains View':'Mountain View'
+  };
+  function featureName(value){
+    const spaced=propertyType(value).replace(/_/g,' ').replace(/\b(\w+)(?:\s+\1\b)+/gi,'$1').replace(/\s+/g,' ').trim();
+    return featureAliases[spaced]||spaced;
+  }
+  const featureCategories=[
+    ['Appliances',/stove|oven|dishwasher|refrigerator|freezer|microwave|cooktop|range|disposal|barbecue|water softener|water purifier/i],
+    ['Heating & Cooling',/cooling|\bheat(?:ing)?\b|air condition/i],
+    ['Parking',/garage|driveway|^door\s*(multi|single)|^paved$|parking|carport/i],
+    ['View',/\bview\b/i],
+    ['Pool & Spa',/\b(pool|spa)\b/i],
+    ['Water & Sewer',/\b(water|sewer|septic)\b/i],
+    ['Exterior Features',/exterior|style|roof|patio|porch|balcony|deck|fence|garden|landscap/i],
+    ['Interior Features',/floor|fireplace|ceiling|built-in|breakfast|molding|dining|pantry|storage|foyer|bath|loft|suite|cellar|covering|window|drapes|screens|shutters|kitchen|\bbar\b/i]
+  ];
+  function featureGroups(items){
+    const groups=new Map();
+    for(const item of Array.isArray(items)?items:[]){
+      const raw=String(item??'').trim();if(!raw)continue;
+      const colon=raw.indexOf(':');
+      const original=colon>0?raw.slice(colon+1).trim():raw;
+      if(!original)continue;
+      let category=colon>0?featureName(raw.slice(0,colon).trim()):'';
+      const match=featureCategories.find(([,pattern])=>pattern.test(propertyType(category||original)));
+      category=match?.[0]||category||'Other features';
+      const name=featureName(original);
+      if(!groups.has(category))groups.set(category,new Map());
+      groups.get(category).set(name.toLowerCase(),{name,original});
+    }
+    const order=['Appliances','Interior Features','Heating & Cooling','Parking','Exterior Features','Pool & Spa','View','Water & Sewer','Other features'];
+    return [...groups].sort(([a],[b])=>{
+      const rank=value=>{const index=order.indexOf(value);return index<0?order.length:index;};return rank(a)-rank(b);
+    });
+  }
+  function features(items){
+    const groups=featureGroups(items);if(!groups.length)return '';
+    return '<section class="property-features"><h2>Features</h2><div class="property-feature-groups">'+groups.map(([category,values])=>{
+      const entries=[...values.values()];
+      for(const {name,original} of entries)if(chineseUI[original]&&!chineseUI[name])chineseUI[name]=chineseUI[original];
+      return '<section class="property-feature-group"><h3>'+escapeHTML(category)+'</h3><ul>'+entries.map(({name})=>'<li>'+escapeHTML(name)+'</li>').join('')+'</ul></section>';
+    }).join('')+'</div></section>';
+  }
+  function contactButton(){return '<aside class="property-contact"><a class="button" href="/contact">Contact Me '+arrow+'</a></aside>';}
+  function calculatorField(name,label,{value='',unit='$',required=false,step='0.01'}={}){
+    return '<label class="field mortgage-field" for="mortgage-'+name+'"><span>'+label+'</span><span class="mortgage-input"><span aria-hidden="true">'+unit+'</span><input id="mortgage-'+name+'" name="'+name+'" type="number" inputmode="decimal" min="0" step="'+step+'" '+(required?'required ':'')+'value="'+escapeHTML(value)+'"></span></label>';
+  }
+  function calculator(p){return `<details class="property-calculator" open><summary><span>Mortgage calculator</span><span class="calculator-toggle" aria-hidden="true">+</span></summary><form id="mortgage-form" novalidate><div class="mortgage-core-grid">${calculatorField('price','Price',{value:p.price,required:true})}<fieldset class="mortgage-down"><legend>Down payment</legend><div class="mortgage-down-inputs"><label class="mortgage-input"><span aria-hidden="true">$</span><input id="mortgage-down" name="down" aria-label="Down payment" type="number" inputmode="decimal" min="0" step="0.01" value="${Math.round(p.price*.2)}" required></label><label class="mortgage-input mortgage-percent"><input id="mortgage-down-percent" name="downPercent" aria-label="Down payment (%)" type="number" inputmode="decimal" min="0" max="100" step="0.01" value="20" required><span aria-hidden="true">%</span></label></div><input class="mortgage-range" name="downSlider" aria-label="Down payment (%)" type="range" min="0" max="100" step="1" value="20"></fieldset>${calculatorField('rate','Interest rate (%)',{unit:'%',required:true})}${select('term','Loan term',[['30','30 years'],['20','20 years'],['15','15 years']])}</div><details class="mortgage-costs"><summary><span><span>Annual property tax</span> · <span>Annual insurance</span> · <span>Monthly HOA</span></span><span class="calculator-toggle" aria-hidden="true">+</span></summary><div class="mortgage-cost-grid">${calculatorField('tax','Annual property tax',{value:0})}${calculatorField('insurance','Annual insurance',{value:0})}${calculatorField('hoa','Monthly HOA',{value:num(p.raw.HOAFee1)})}</div></details><p class="form-message is-error" role="status"></p><div class="mortgage-bottom"><output id="mortgage-result" aria-live="polite"><small>Estimated payment</small><div><strong>—</strong><span>/ month</span></div></output><button class="button" type="submit">Calculate</button></div></form></details>`;}
   async function bind(id){
     const container=document.getElementById('property-page');if(!container)return;
     const controller=new AbortController();idxControllers.add(controller);
@@ -22,11 +73,11 @@ window.DaisyProperty=(()=>{
       const p={...previous,id,mls:raw.MLS_NUM||previous?.mls||'',address:hidden?'Address available on request':String(raw.addressA||raw.address||previous?.address||'').trim(),city:raw.CityName||previous?.city||'',zip:String(raw.ZIP||previous?.zip||'').trim().replace(/-$/,''),price:num(raw.listprice)||previous?.price||0,beds:num(raw.nBeds),baths:num(raw.nBaths),sqft:num(raw.ImprovedSquareFeet),status:raw.ListingStatus||previous?.status||'',raw};
       current=p;photos=(Array.isArray(raw.firstImage)?raw.firstImage:[raw.firstImage]).map(safeURL).filter(Boolean);photoIndex=0;
       DaisyIDX.properties.set(id.toUpperCase(),p);
-      container.innerHTML=`<div class="property-intro"><div class="property-title"><div><h1>${escapeHTML(p.address)}</h1><p>${escapeHTML(p.city)}, CA ${escapeHTML(p.zip)}</p></div><div class="detail-price"><div class="property-price-line"><span>${money(p.price)}</span><span class="detail-status">${escapeHTML(p.status)}</span></div><div class="property-facts"><span>${p.beds} beds</span><span>${p.baths} baths</span><span>${number(p.sqft)} sq ft</span></div></div></div><div class="property-gallery ${photos.length<3?'few-photos':''}">${photos.slice(0,3).map((src,i)=>`<button class="gallery-tile" data-photo="${i}" aria-label="View photo ${i+1}"><img src="${escapeHTML(src)}" alt="${escapeHTML(p.address)} · ${i+1}" ${i?'loading="lazy"':'fetchpriority="high"'}></button>`).join('')}${photos.length?`<button class="button gallery-all" data-photo="0">All photos (${photos.length})</button>`:'<div class="photo-unavailable">Photo unavailable</div>'}</div></div><div class="property-layout"><div class="property-body"><section class="property-overview"><h2>Overview</h2>${(Array.isArray(raw.rem)?raw.rem:[raw.rem]).filter(Boolean).map(text=>`<p data-no-translate>${escapeHTML(text)}</p>`).join('')}${p.virtualTour?`<a class="text-link" href="${escapeHTML(safeURL(p.virtualTour))}" target="_blank" rel="noopener">Virtual tour ${diagonal}</a>`:''}<div id="property-open-house"></div></section><section><h2>Property details</h2><dl class="detail-facts">${fact('MLS number',p.mls)+fact('Property type',propertyType(raw.PropSubType||raw.PropertyType))+fact('Year built',raw.YearBuilt)+fact('Lot size',raw.LotSquareFeet?number(num(raw.LotSquareFeet))+' sq ft':'')+fact('Garage',raw.GarageCars)+fact('Stories',raw.Stories)+fact('HOA',raw.HOAFee1?money(num(raw.HOAFee1)):'')+fact('County',raw.County)+fact('Days on market',raw.daysOnMarket)+fact('Last updated',raw.Modified?.date||raw.Modified||raw.databaseUpdated)}</dl></section>${Array.isArray(raw.ntFt)&&raw.ntFt.length?`<section><h2>Features</h2><dl class="detail-features">${raw.ntFt.map(item=>{const text=String(item),colon=text.indexOf(':');return colon>0?fact(escapeHTML(text.slice(0,colon)),text.slice(colon+1).trim()):fact('',text);}).join('')}</dl></section>`:''}<section id="detail-location" hidden><h2>Location</h2><div class="detail-map" id="property-map"></div></section>${calculator(p)}<section class="listing-credit"><h2>Listing information</h2><p>${escapeHTML([raw.ListAgentFirstName,raw.ListAgentLastName].filter(Boolean).join(' '))}${raw.ListAgentDRE?' · DRE #'+escapeHTML(raw.ListAgentDRE):''}</p><p>${escapeHTML(raw.ListOfficeName||'')}</p><p>${escapeHTML(raw.OriginatingSystemName||raw.systemName||'')} · MLS #${escapeHTML(p.mls)}</p></section></div>${inquiry(p)}</div>`;
+      container.innerHTML=`<div class="property-intro"><div class="property-title"><div><h1>${escapeHTML(p.address)}</h1><p>${escapeHTML(p.city)}, CA ${escapeHTML(p.zip)}</p></div><div class="detail-price"><div class="property-price-line"><span>${money(p.price)}</span><span class="detail-status">${escapeHTML(p.status)}</span></div><div class="property-facts"><span>${p.beds} beds</span><span>${p.baths} baths</span><span>${number(p.sqft)} sq ft</span></div></div></div><div class="property-gallery ${photos.length<3?'few-photos':''}">${photos.slice(0,3).map((src,i)=>`<button class="gallery-tile" data-photo="${i}" aria-label="View photo ${i+1}"><img src="${escapeHTML(src)}" alt="${escapeHTML(p.address)} · ${i+1}" ${i?'loading="lazy"':'fetchpriority="high"'}></button>`).join('')}${photos.length?`<button class="button gallery-all" data-photo="0">All photos (${photos.length})</button>`:'<div class="photo-unavailable">Photo unavailable</div>'}</div></div><div class="property-layout"><div class="property-body"><section class="property-overview"><h2>Overview</h2>${(Array.isArray(raw.rem)?raw.rem:[raw.rem]).filter(Boolean).map(text=>`<p data-no-translate>${escapeHTML(text)}</p>`).join('')}${p.virtualTour?`<a class="text-link" href="${escapeHTML(safeURL(p.virtualTour))}" target="_blank" rel="noopener">Virtual tour ${diagonal}</a>`:''}<div id="property-open-house"></div></section><section><h2>Property details</h2><dl class="detail-facts">${fact('MLS number',p.mls)+fact('Property type',propertyType(raw.PropSubType||raw.PropertyType))+fact('Year built',raw.YearBuilt)+fact('Lot size',raw.LotSquareFeet?number(num(raw.LotSquareFeet))+' sq ft':'')+fact('Garage',raw.GarageCars)+fact('Stories',raw.Stories)+fact('HOA',raw.HOAFee1?money(num(raw.HOAFee1)):'')+fact('County',raw.County)+fact('Days on market',raw.daysOnMarket)+fact('Last updated',raw.Modified?.date||raw.Modified||raw.databaseUpdated)}</dl></section>${features(raw.ntFt)}<section id="detail-location" hidden><h2>Location</h2><div class="detail-map" id="property-map"></div></section>${calculator(p)}<section class="listing-credit"><h2>Listing information</h2><p>${escapeHTML([raw.ListAgentFirstName,raw.ListAgentLastName].filter(Boolean).join(' '))}${raw.ListAgentDRE?' · DRE #'+escapeHTML(raw.ListAgentDRE):''}</p><p>${escapeHTML(raw.ListOfficeName||'')}</p><p>${escapeHTML(raw.OriginatingSystemName||raw.systemName||'')} · MLS #${escapeHTML(p.mls)}</p></section></div>${contactButton()}</div>`;
       const credit=container.querySelector('.listing-credit p');const first=String(raw.ListAgentFirstName||'').trim(),last=String(raw.ListAgentLastName||'').trim();if(first&&last.toLowerCase().startsWith(first.toLowerCase()+' '))credit.textContent=last+(raw.ListAgentDRE?' · DRE #'+raw.ListAgentDRE:'');
       document.title=p.address+' · Daisy Li';
       container.querySelectorAll('[data-photo]').forEach(button=>button.onclick=()=>openGallery(Number(button.dataset.photo)));
-      bindInquiry(container,p);bindCalculator(container);DaisyAccount.paint();applyLanguage(container);
+      bindCalculator(container);DaisyAccount.paint();applyLanguage(container);
       if(!p.latitude&&p.mls){try{const result=await DaisyIDX.listings('/'+encodeURIComponent(p.mls)+'_mlsNumber',{signal:controller.signal});const found=result.items.find(item=>item.id.toUpperCase()===id.toUpperCase());if(found)for(const key of ['latitude','longitude','virtualTour','openStart','openEnd'])p[key]=found[key];DaisyIDX.properties.set(id.toUpperCase(),p);}catch{}}
       if(!container.isConnected)return;
       if(p.latitude&&p.longitude){container.querySelector('#detail-location').hidden=false;DaisyMap.property(container.querySelector('#property-map'),p);}
@@ -44,29 +95,52 @@ window.DaisyProperty=(()=>{
     gallery.showModal();setPhoto(index);applyLanguage(gallery);
   }
   function setPhoto(index){photoIndex=(index+photos.length)%photos.length;const img=gallery.querySelector('#gallery-photo');img.src=photos[photoIndex];img.alt=current.address+' · '+(photoIndex+1);gallery.querySelector('#gallery-count').textContent=`${photoIndex+1} / ${photos.length}`;gallery.querySelectorAll('[data-gallery-index]').forEach(button=>{button.setAttribute('aria-pressed',String(Number(button.dataset.galleryIndex)===photoIndex));});for(const next of [photoIndex-1,photoIndex+1]){const preload=new Image();preload.src=photos[(next+photos.length)%photos.length];}}
-  function bindInquiry(container,p){
-    const form=container.querySelector('#property-inquiry-form');
-    form.elements.showing.onchange=()=>{form.querySelector('#showing-fields').hidden=!form.elements.showing.checked;form.elements.date.required=form.elements.showing.checked;};
+  function bindCalculator(container){
+    const form=container.querySelector('#mortgage-form');
+    const {price,down,downPercent,downSlider}=form.elements;
+    const output=form.querySelector('output'),message=form.querySelector('.form-message');
+    let downMode='percent';
+    const round=value=>Math.round((value+Number.EPSILON)*100)/100;
+    function syncDown(source){
+      if(source===down)downMode='amount';
+      if(source===downPercent||source===downSlider)downMode='percent';
+      if(source===downSlider)downPercent.value=downSlider.value;
+      const amount=price.valueAsNumber;
+      if(downMode==='percent'){
+        down.value=Number.isFinite(amount)&&Number.isFinite(downPercent.valueAsNumber)?round(amount*downPercent.valueAsNumber/100):'';
+      }else downPercent.value=amount>0&&Number.isFinite(down.valueAsNumber)?round(down.valueAsNumber/amount*100):'';
+      downSlider.value=String(Math.max(0,Math.min(100,downPercent.valueAsNumber||0)));
+      down.max=Number.isFinite(amount)?String(amount):'';
+    }
+    function calculate(){
+      down.setCustomValidity('');message.textContent='';
+      const exceeds=Number.isFinite(down.valueAsNumber)&&Number.isFinite(price.valueAsNumber)&&down.valueAsNumber>price.valueAsNumber;
+      if(exceeds){
+        const error='Down payment cannot exceed the price.';
+        message.textContent=error;down.setCustomValidity(siteLanguage==='zh'?zh(error):error);
+      }
+      let payment=null;
+      if(form.checkValidity()){
+        const values=Object.fromEntries([...new FormData(form)].map(([key,value])=>[key,Number(value)]));
+        const loan=values.price-values.down,months=values.term*12,rate=values.rate/1200;
+        payment=(rate?loan*rate/-Math.expm1(-months*Math.log1p(rate)):loan/months)+(values.tax+values.insurance)/12+values.hoa;
+      }
+      output.innerHTML='<small>Estimated payment</small><div><strong>'+(Number.isFinite(payment)?money(payment):'—')+'</strong><span>/ month</span></div>';
+      output.dataset.ready=String(Number.isFinite(payment));
+      applyLanguage(output);applyLanguage(message);
+    }
+    form.addEventListener('input',event=>{
+      if([price,down,downPercent,downSlider].includes(event.target))syncDown(event.target);
+      calculate();
+    });
+    form.addEventListener('change',calculate);
     form.onsubmit=event=>{
-      event.preventDefault();if(!form.reportValidity())return;
-      const data=Object.fromEntries(new FormData(form)),label=text=>siteLanguage==='zh'?zh(text):text;
-      const lines=[p.address,[p.city,'CA',p.zip].filter(Boolean).join(' '),`${label('MLS number')}: ${p.mls}`,'',`${label('Name')}: ${data.name}`,`${label('Email')}: ${data.email}`];
-      if(data.phone.trim())lines.push(`${label('Phone')}: ${data.phone}`);
-      lines.push('',data.message);
-      if(form.elements.showing.checked)lines.push('',label('Request a showing'),`${label('Preferred date')}: ${data.date}`,`${label('Response requested')}: ${label(data.response)}`);
-      // A local preview URL would not open on the recipient's phone.
-      const pageURL=new URL(location.href);pageURL.search='';pageURL.hash='';
-      if(!['localhost','127.0.0.1','[::1]'].includes(pageURL.hostname))lines.push('',pageURL.href);
-      const body=encodeURIComponent(lines.join('\n'));
-      const apple=/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent);
-      const link=document.createElement('a');link.hidden=true;
-      link.href=event.submitter?.value==='email'
-        ?`mailto:daisylirealty@gmail.com?subject=${encodeURIComponent(label('Request information')+' · '+p.address)}&body=${body}`
-        :`sms:+19498610160${apple?'&':'?'}body=${body}`;
-      form.append(link);link.click();link.remove();
-      // Keep the draft intact: opening a messaging app does not confirm delivery.
+      event.preventDefault();calculate();
+      const invalid=form.querySelector(':invalid');
+      if(invalid){const disclosure=invalid.closest('.mortgage-costs');if(disclosure)disclosure.open=true;invalid.reportValidity();invalid.focus();return;}
+      output.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth',block:'nearest'});
     };
+    syncDown(downPercent);calculate();
   }
-  function bindCalculator(container){const form=container.querySelector('#mortgage-form');form.querySelectorAll('[type=number]').forEach(input=>{input.min='0';input.step=input.name==='rate'?'0.01':'1';});form.onsubmit=event=>{event.preventDefault();const values=Object.fromEntries([...new FormData(form)].map(([key,value])=>[key,Number(value)]));const loan=values.price-values.down,months=values.term*12,r=values.rate/1200;const message=form.querySelector('.form-message');if(loan<0){message.textContent='Down payment cannot exceed the price.';applyLanguage(form);return;}message.textContent='';const payment=(r?loan*r/(1-Math.pow(1+r,-months)):loan/months)+(values.tax+values.insurance)/12+values.hoa;form.querySelector('output').innerHTML=`<strong>${money(payment)} <span>/ month</span></strong><small>Estimated payment</small>`;applyLanguage(form);};}
   return {render,bind,close(){if(gallery.open)gallery.close();}};
 })();

@@ -1,5 +1,10 @@
 'use strict';
 Object.assign(chineseUI,{
+ 'Heating & Cooling':'供暖与制冷','Pool & Spa':'泳池与水疗池','Water & Sewer':'供水与排污','Other features':'其他设施','Down payment (%)':'首付比例（%）',
+ 'Gas Range':'燃气炉灶','Tile Floors':'瓷砖地面','Zoned Cooling':'分区制冷','Traditional Style':'传统风格','Drywall Exterior':'石膏板外墙','Concrete Exterior':'混凝土外墙','Brick Fence':'砖围墙','Golf Course View':'高尔夫球场景观','Trees Woods View':'树林景观','Wet Bar':'带水槽吧台','Eat-in Kitchen':'带用餐区的厨房','Bar':'吧台','Plantation Shutters':'种植园式百叶窗',
+ 'Rear-facing garage':'后向车库'
+});
+Object.assign(chineseUI,{
  'Send text':'发送短信',
  'No other homes for sale in this area.':'此区域暂无其他在售房源。','Could not load nearby homes.':'暂时无法加载附近房源。',
  'Required':'必选','Status':'房源状态',
