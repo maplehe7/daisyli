@@ -7,6 +7,7 @@ const headerBrand = document.querySelector('.site-header .brand');
 headerBrand.querySelector('span').textContent = 'Daisy Li, Broker';
 headerBrand.querySelector('img').src = 'https://maplehe7.github.io/daisyli/web/assets/daisylogo_black.png';
 document.querySelectorAll('meta[name="theme-color"]').forEach(meta => meta.content = '#ffffff');
+document.querySelector('#main-nav a[href="/account"]')?.remove();
 const arrow = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h15m-6-6 6 6-6 6"/></svg>';
 const diagonal = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 18 18 6M6 6h12v12"/></svg>';
 const heart = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z"/></svg>';
