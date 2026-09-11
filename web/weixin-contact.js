@@ -33,7 +33,7 @@ window.DaisyWeixin = (() => {
       : `<button type="button" class="button weixin-button" disabled>${icon}${label}</button>`;
     const qrImage = qr ? `<span class="weixin-qr-image"><img class="weixin-profile-qr" src="${escapeHTML(qr)}" alt="Daisy Li's Weixin QR code" width="888" height="1137"></span>` : '';
     const qrButton = qr ? `<button type="button" class="weixin-qr-open" data-open-weixin-qr aria-haspopup="dialog" aria-controls="weixin-qr-dialog" aria-label="Enlarge Weixin QR code">${qrImage}<span class="weixin-qr-cue">${expandIcon}<span>Tap to enlarge</span></span></button>` : '';
-    const viewer = qr ? `<dialog id="weixin-qr-dialog" class="weixin-qr-dialog" aria-labelledby="weixin-qr-title"><div class="weixin-qr-viewer"><header><h2 id="weixin-qr-title">Weixin QR code</h2><button type="button" class="weixin-qr-close" data-close-weixin-qr aria-label="Close QR code"><span aria-hidden="true">×</span><span>Close</span></button></header>${qrImage}<div class="weixin-qr-account" data-no-translate>${escapeHTML(config.id)}</div></div></dialog>` : '';
+    const viewer = qr ? `<dialog id="weixin-qr-dialog" class="weixin-qr-dialog" aria-labelledby="weixin-qr-title"><div class="weixin-qr-viewer"><div class="weixin-qr-toolbar"><h2 id="weixin-qr-title">Weixin QR code</h2><button type="button" class="weixin-qr-close" data-close-weixin-qr aria-label="Close QR code"><span aria-hidden="true">×</span><span>Close</span></button></div>${qrImage}<div class="weixin-qr-account" data-no-translate>${escapeHTML(config.id)}</div></div></dialog>` : '';
     return `<div class="contact-weixin" id="weixin-contact"><div class="weixin-controls">${button}</div><figure class="weixin-qr" id="weixin-qr">${qrButton}<div class="weixin-qr-placeholder" aria-hidden="true" ${qr ? 'hidden' : ''}>${icon}</div><figcaption>Weixin QR code</figcaption></figure>${viewer}</div>`;
   }
 
@@ -48,9 +48,12 @@ window.DaisyWeixin = (() => {
       img.addEventListener('error', unavailable, { once: true });
       if (img.complete && !img.naturalWidth) unavailable();
     }
-    trigger?.addEventListener('click', () => dialog.showModal());
+    trigger?.addEventListener('click', () => { if (dialog && !dialog.open) dialog.showModal(); });
     section.querySelector('[data-close-weixin-qr]')?.addEventListener('click', () => dialog.close());
-    dialog?.addEventListener('close', () => trigger.focus({ preventScroll: true }));
+    dialog?.addEventListener('click', event => {
+      if (event.target === dialog || event.target === dialog.querySelector('.weixin-qr-viewer')) dialog.close();
+    });
+    dialog?.addEventListener('close', () => { if (trigger?.isConnected) trigger.focus({ preventScroll: true }); });
   }
   return { config, render, bind };
 })();
