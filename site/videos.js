@@ -253,7 +253,7 @@ window.DaisyHeroVideo = (() => {
   let dispose;
 
   function render() {
-    return `<div class="hero-photo hero-film"><img class="hero-film-poster" src="${assetRoot}poster.jpg" alt="" fetchpriority="high" width="1920" height="1080"><video class="hero-film-video" muted autoplay loop playsinline preload="metadata" poster="${assetRoot}poster.jpg" aria-hidden="true" disablepictureinpicture></video></div>`;
+    return `<div class="hero-photo hero-film"><img class="hero-film-poster" src="${assetRoot}poster.jpg?rev=golf-opening" alt="" fetchpriority="high" width="1920" height="1080"><video class="hero-film-video" muted autoplay loop playsinline preload="metadata" poster="${assetRoot}poster.jpg?rev=golf-opening" aria-hidden="true" disablepictureinpicture></video></div>`;
   }
 
   function bind() {
@@ -276,7 +276,7 @@ window.DaisyHeroVideo = (() => {
 
     function prepare() {
       if (started || disposed) return;
-      video.src = assetRoot + 'film.mp4';
+      video.src = assetRoot + 'film.mp4?rev=golf-opening';
       started = true;
     }
 

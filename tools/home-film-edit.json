@@ -40,13 +40,61 @@
   },
   "clips": [
     {
+      "source": "10-skylark",
+      "in": 11.25,
+      "out": 19,
+      "scene": "exterior",
+      "singleContinuousShot": false,
+      "cropY": 1460,
+      "intentionalTransitions": [
+        "Original golf-course-to-house rolling transition retained at the user request"
+      ],
+      "outputStart": 0,
+      "outputDuration": 3.875
+    },
+    {
+      "source": "10-skylark",
+      "in": 34.75,
+      "out": 38.375,
+      "scene": "exterior",
+      "cropY": 1460,
+      "singleContinuousShot": true,
+      "outputStart": 3.875,
+      "outputDuration": 1.8125
+    },
+    {
+      "source": "10-skylark",
+      "in": 104.5,
+      "out": 108.875,
+      "scene": "exterior",
+      "singleContinuousShot": false,
+      "cropY": 1460,
+      "intentionalTransitions": [
+        "Complete pool-to-golf-view cut from the original tour"
+      ],
+      "outputStart": 5.6875,
+      "outputDuration": 2.1875
+    },
+    {
       "source": "48-panorama",
       "in": 9.5,
       "out": 13.5,
       "scene": "exterior",
       "singleContinuousShot": true,
-      "outputStart": 0,
+      "outputStart": 7.875,
       "outputDuration": 2.0
+    },
+    {
+      "source": "48-panorama",
+      "in": 13.9375,
+      "out": 18.25,
+      "scene": "exterior",
+      "singleContinuousShot": false,
+      "intentionalTransitions": [
+        "Two complete aerial angles from the original tour"
+      ],
+      "outputStart": 9.875,
+      "outputDuration": 2.1666666666666665
     },
     {
       "source": "48-panorama",
@@ -55,8 +103,17 @@
       "scene": "interior",
       "room": "48-panorama living room",
       "singleContinuousShot": true,
-      "outputStart": 2.0,
+      "outputStart": 12.041666666666666,
       "outputDuration": 1.0
+    },
+    {
+      "source": "48-panorama",
+      "in": 173.875,
+      "out": 176,
+      "scene": "exterior",
+      "singleContinuousShot": true,
+      "outputStart": 13.041666666666666,
+      "outputDuration": 1.0625
     },
     {
       "source": "48-panorama",
@@ -64,7 +121,7 @@
       "out": 190.875,
       "scene": "exterior",
       "singleContinuousShot": true,
-      "outputStart": 3.0,
+      "outputStart": 14.104166666666666,
       "outputDuration": 1.625
     },
     {
@@ -73,7 +130,7 @@
       "out": 14.25,
       "scene": "exterior",
       "singleContinuousShot": true,
-      "outputStart": 4.625,
+      "outputStart": 15.729166666666666,
       "outputDuration": 1.0625
     },
     {
@@ -83,7 +140,7 @@
       "scene": "interior",
       "room": "8-panorama living room",
       "singleContinuousShot": true,
-      "outputStart": 5.6875,
+      "outputStart": 16.791666666666664,
       "outputDuration": 1.0
     },
     {
@@ -92,7 +149,16 @@
       "out": 28.875,
       "scene": "exterior",
       "singleContinuousShot": true,
-      "outputStart": 6.6875,
+      "outputStart": 17.791666666666664,
+      "outputDuration": 1.375
+    },
+    {
+      "source": "8-panorama",
+      "in": 190.25,
+      "out": 193,
+      "scene": "exterior",
+      "singleContinuousShot": true,
+      "outputStart": 19.166666666666664,
       "outputDuration": 1.375
     },
     {
@@ -101,28 +167,8 @@
       "out": 196,
       "scene": "exterior",
       "singleContinuousShot": true,
-      "outputStart": 8.0625,
+      "outputStart": 20.541666666666664,
       "outputDuration": 1.3125
-    },
-    {
-      "source": "10-skylark",
-      "in": 34.75,
-      "out": 38.375,
-      "scene": "exterior",
-      "cropY": 1460,
-      "singleContinuousShot": true,
-      "outputStart": 9.375,
-      "outputDuration": 1.8125
-    },
-    {
-      "source": "10-skylark",
-      "in": 38.875,
-      "out": 41.75,
-      "scene": "exterior",
-      "cropY": 1460,
-      "singleContinuousShot": true,
-      "outputStart": 11.1875,
-      "outputDuration": 1.4375
     },
     {
       "source": "102-nest-pine",
@@ -130,7 +176,7 @@
       "out": 48.125,
       "scene": "exterior",
       "singleContinuousShot": true,
-      "outputStart": 12.625,
+      "outputStart": 21.854166666666664,
       "outputDuration": 1.9375
     },
     {
@@ -139,7 +185,7 @@
       "out": 179.875,
       "scene": "exterior",
       "singleContinuousShot": true,
-      "outputStart": 14.5625,
+      "outputStart": 23.791666666666664,
       "outputDuration": 2.5
     },
     {
@@ -148,12 +194,28 @@
       "out": 195.75,
       "scene": "exterior",
       "singleContinuousShot": true,
-      "outputStart": 17.0625,
+      "outputStart": 26.291666666666664,
       "outputDuration": 1.5
+    },
+    {
+      "source": "8-panorama",
+      "in": 6.25,
+      "out": 10.75,
+      "scene": "exterior",
+      "singleContinuousShot": true,
+      "outputStart": 27.791666666666664,
+      "outputDuration": 2.25
     }
   ],
+  "revision": "golf-opening",
+  "notes": [
+    "Golf course to house transition opens the film as requested",
+    "Only one continuous indoor shot per room",
+    "Source flashes and orphaned shot fragments removed",
+    "All clips encoded together from original sources into one continuous H.264 stream"
+  ],
   "output": {
-    "durationSeconds": 18.5625,
+    "durationSeconds": 30.041666666666664,
     "audio": false,
     "speedBakedIntoFile": true,
     "framesPerSecond": 48,
@@ -163,19 +225,25 @@
     ],
     "codec": "H.264",
     "crf": 18,
-    "bytes": 47610109,
     "cutTimes": [
-      2.0,
-      3.0,
-      4.625,
+      3.875,
       5.6875,
-      6.6875,
-      8.0625,
-      9.375,
-      11.1875,
-      12.625,
-      14.5625,
-      17.0625
-    ]
+      7.875,
+      9.875,
+      12.041666666666666,
+      13.041666666666666,
+      14.104166666666666,
+      15.729166666666666,
+      16.791666666666664,
+      17.791666666666664,
+      19.166666666666664,
+      20.541666666666664,
+      21.854166666666664,
+      23.791666666666664,
+      26.291666666666664,
+      27.791666666666664
+    ],
+    "bytes": 79613617,
+    "sha256": "bbf6dbbc4b65d678548df1f1be339e30b5acc950ddc6cde6dedcfdb56ab7174f"
   }
 }
