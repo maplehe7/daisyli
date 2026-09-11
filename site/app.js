@@ -1,4 +1,6 @@
 'use strict';
+const siteFavicon = document.querySelector('link[rel="icon"]');
+if (siteFavicon) { siteFavicon.href = '/assets/favicon.png'; siteFavicon.type = 'image/png'; siteFavicon.sizes = '256x256'; }
 // Keep the existing WordPress entry page in sync with the hosted header assets.
 const headerBrand = document.querySelector('.site-header .brand');
 headerBrand.querySelector('span').textContent = 'Daisy Li, Broker';
