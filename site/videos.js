@@ -250,7 +250,7 @@ window.DaisyVideos = (() => {
 
 /* Selected property clips are trimmed, joined, and rendered at 2x with no audio. */
 window.DaisyHeroVideo = (() => {
-  const assetRoot = '/assets/home-film-v2/';
+  const assetRoot = '/assets/home-film-v3/';
   let loader, dispose;
 
   function render() {

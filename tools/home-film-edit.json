@@ -1,5 +1,5 @@
 {
-  "version": "home-film-v2",
+  "version": "home-film-v3",
   "speed": 2,
   "fps": 48,
   "audio": false,
@@ -72,9 +72,10 @@
     },
     {
       "source": "48-panorama",
-      "in": 32,
-      "out": 38,
-      "scene": "interior"
+      "in": 34.4,
+      "out": 36.4,
+      "scene": "interior",
+      "room": "48 Panorama living room"
     },
     {
       "source": "48-panorama",
@@ -109,9 +110,10 @@
     },
     {
       "source": "8-panorama",
-      "in": 51,
-      "out": 56,
-      "scene": "interior"
+      "in": 52.4,
+      "out": 54.4,
+      "scene": "interior",
+      "room": "8 Panorama living room"
     },
     {
       "source": "8-panorama",
@@ -158,9 +160,9 @@
     }
   ],
   "output": {
-    "durationSeconds": 67.75,
+    "durationSeconds": 64.25,
     "exteriorSeconds": 62.25,
-    "exteriorPercent": 91.9,
+    "exteriorPercent": 96.9,
     "audio": false,
     "speedBakedIntoFile": true,
     "segmentSeconds": 4,
@@ -171,10 +173,10 @@
         "height": 720,
         "width": 1280,
         "codec": "avc1.64002a",
-        "bandwidth": 15024407,
-        "averageBandwidth": 8376433,
-        "duration": 67.75,
-        "bytes": 70937920,
+        "bandwidth": 13952294,
+        "averageBandwidth": 8660585,
+        "duration": 64.25,
+        "bytes": 69555323,
         "segments": 17
       },
       {
@@ -182,9 +184,9 @@
         "width": 1920,
         "codec": "avc1.64002a",
         "bandwidth": 30094167,
-        "averageBandwidth": 19011484,
-        "duration": 67.75,
-        "bytes": 161003506,
+        "averageBandwidth": 19700553,
+        "duration": 64.25,
+        "bytes": 158220068,
         "segments": 17
       }
     ]
