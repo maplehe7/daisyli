@@ -74,4 +74,39 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMenu();});
 
 window.addEventListener('popstate',()=>{route();closeMenu();});
 window.addEventListener('pageshow',()=>{if(location.pathname==='/'&&!location.hash)window.scrollTo({top:0,left:0,behavior:'instant'});});
+
+// Freeze the page behind every dialog, including touch scrolling on iOS.
+// Observe removals too: navigating away can remove an open dialog without close().
+(() => {
+  const root=document.documentElement,body=document.body;
+  const properties=['position','top','left','width','padding-right'];
+  let saved=null;
+  function sync(){
+    const open=!!document.querySelector('dialog[open]');
+    if(open&&!saved){
+      const gap=Math.max(0,window.innerWidth-root.clientWidth);
+      const padding=parseFloat(getComputedStyle(body).paddingRight)||0;
+      saved={x:window.scrollX,y:window.scrollY,url:location.href,
+        styles:properties.map(name=>[name,body.style.getPropertyValue(name),body.style.getPropertyPriority(name)])};
+      body.style.position='fixed';body.style.top=`-${saved.y}px`;body.style.left=`-${saved.x}px`;
+      body.style.width='100%';
+      if(gap)body.style.paddingRight=`${padding+gap}px`;
+      root.classList.add('dialog-scroll-locked');
+    }else if(!open&&saved){
+      const previous=saved;saved=null;
+      root.classList.remove('dialog-scroll-locked');
+      for(const [name,value,priority] of previous.styles){
+        if(value)body.style.setProperty(name,value,priority);else body.style.removeProperty(name);
+      }
+      if(location.href===previous.url)window.scrollTo({left:previous.x,top:previous.y,behavior:'instant'});
+    }
+  }
+  const containsDialog=node=>node.nodeType===1&&(node.matches('dialog')||node.querySelector('dialog'));
+  new MutationObserver(records=>{
+    if(records.some(record=>record.type==='attributes'?record.target.matches('dialog'):
+      [...record.addedNodes,...record.removedNodes].some(containsDialog)))sync();
+  }).observe(body,{subtree:true,childList:true,attributes:true,attributeFilter:['open']});
+  window.addEventListener('pageshow',sync);
+  sync();
+})();
 route();

@@ -63,6 +63,3 @@
   .weixin-qr-viewer>.weixin-qr-image{width:min(100%,calc(100dvh - 140px - env(safe-area-inset-top) - env(safe-area-inset-bottom)));align-self:center;justify-self:center}
   .weixin-qr-account{margin:0}
 }
-
-/* Restore normal scrolling automatically when the viewer closes or is removed. */
-html:has(#weixin-qr-dialog[open]),body:has(#weixin-qr-dialog[open]){overflow:hidden;overscroll-behavior:none}
