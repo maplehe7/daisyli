@@ -277,17 +277,18 @@ window.DaisyHeroVideo = (() => {
       intro.querySelector(':scope > .hero-photo').outerHTML = render();
       intro.querySelector('.hero-photo-caption')?.remove();
     }
-    const video = document.querySelector('.hero-film-video');
+    let video = document.querySelector('.hero-film-video');
     if (!video) return;
     const motion = matchMedia('(prefers-reduced-motion: reduce)');
     const connection = navigator.connection;
     const events = new AbortController();
     const on = (target, event, handler) => target.addEventListener(event, handler, {signal:events.signal});
-    const slow = /(^|-)2g$|3g/.test(connection?.effectiveType || '') || (connection?.downlink > 0 && connection.downlink < 2);
-    let quality = slow ? 2 : (innerWidth > 900 && connection?.downlink >= 8 ? 0 : 1);
+    // 720p stays clear on phones; reserve 480p for an actual sustained stall.
+    let quality = innerWidth > 900 && connection?.downlink >= 8 ? 0 : 1;
     let started = false, disposed = false, visible = true, blocked = false;
     let buffering = true, playing = false, playPending = false, seekTo = null, lowStalls = 0;
     let generation = 0, released = false, releaseReady, stallTimer;
+    let upgradeAttempted = false, upgradeVideo = null, upgradeURL = null, promoting = false, promotionController;
     ready = new Promise(resolve => { releaseReady = resolve; });
     const deferredImages = [...document.querySelectorAll('[data-home-src]')];
     const releaseTimer = setTimeout(releaseContent, 12000);
@@ -309,6 +310,109 @@ window.DaisyHeroVideo = (() => {
 
     function disabled() { return blocked || motion.matches || connection?.saveData; }
 
+    function mediaStep(target, event, action, complete, signal = events.signal) {
+      return new Promise((resolve,reject) => {
+        const finish = error => {
+          clearTimeout(timer); target.removeEventListener(event,done);
+          target.removeEventListener('error',failed); signal.removeEventListener('abort',aborted);
+          if (error) reject(error); else resolve();
+        };
+        const done = () => finish();
+        const failed = () => finish(new Error('Upgrade video could not decode'));
+        const aborted = () => finish(new DOMException('Video preparation cancelled','AbortError'));
+        const timer = setTimeout(failed,15000);
+        target.addEventListener(event,done,{once:true}); target.addEventListener('error',failed,{once:true});
+        signal.addEventListener('abort',aborted,{once:true});
+        if (signal.aborted) { aborted(); return; }
+        try { action(); if (complete()) done(); } catch (error) { finish(error); }
+      });
+    }
+
+    function paintedFrame(target, signal) {
+      return new Promise((resolve,reject) => {
+        let frame, fallbackFrame;
+        const finish = error => {
+          clearTimeout(timer); signal.removeEventListener('abort',abort);
+          if (frame != null) target.cancelVideoFrameCallback?.(frame);
+          if (fallbackFrame != null) cancelAnimationFrame(fallbackFrame);
+          error ? reject(error) : resolve();
+        };
+        const abort = () => finish(new DOMException('Video handoff cancelled','AbortError'));
+        const timer = setTimeout(() => finish(new Error('Upgrade frame timed out')),15000);
+        signal.addEventListener('abort',abort,{once:true});
+        if (signal.aborted) { abort(); return; }
+        if (target.requestVideoFrameCallback) frame = target.requestVideoFrameCallback(() => finish());
+        else fallbackFrame = requestAnimationFrame(() => { fallbackFrame = requestAnimationFrame(() => finish()); });
+      });
+    }
+
+    function discardUpgrade() {
+      if (upgradeVideo) {
+        upgradeVideo.pause(); upgradeVideo.removeAttribute('src'); upgradeVideo.load(); upgradeVideo.remove();
+        upgradeVideo = null;
+      }
+      if (upgradeURL) { URL.revokeObjectURL(upgradeURL); upgradeURL = null; }
+    }
+
+    async function promoteUpgrade() {
+      if (!upgradeVideo || upgradeVideo.readyState < 2 || promoting || disposed || disabled() || !visible || document.hidden || video.paused) return;
+      promoting = true;
+      const previous = video, next = upgradeVideo;
+      const stage = new AbortController(); promotionController = stage;
+      const cancel = () => stage.abort();
+      events.signal.addEventListener('abort',cancel,{once:true});
+      clearTimeout(stallTimer);
+      // Hold the last low-quality frame during the local seek. Never expose the
+      // new video's opening frame or its poster while it catches up.
+      previous.pause(); generation++; playPending = false;
+      try {
+        const position = previous.currentTime % next.duration;
+        await mediaStep(next,'seeked',() => { next.currentTime = position; },
+          () => !next.seeking && Math.abs(next.currentTime-position) < .05,stage.signal);
+        next.playbackRate = previous.playbackRate;
+        const frame = paintedFrame(next,stage.signal);
+        await Promise.all([next.play(),frame]);
+        if (stage.signal.aborted || disposed || disabled() || !visible || document.hidden) return;
+        video = next; upgradeVideo = null; quality = 0;
+        buffering = false; playing = true; seekTo = null; lowStalls = 0;
+        bindMedia(video);
+        video.style.transition = 'none'; // The ready HD frame replaces the held frame without a poster fade.
+        video.classList.add('is-playing');
+        previous.classList.remove('is-playing');
+        previous.removeAttribute('src'); previous.load(); previous.remove();
+      } catch (error) {
+        if (!stage.signal.aborted) discardUpgrade();
+      } finally {
+        events.signal.removeEventListener('abort',cancel);
+        promoting = false; promotionController = null;
+        // Returning from a hidden tab resumes at the same position and retries
+        // the already-downloaded upgrade, without another network request.
+        if (video === previous) { next.pause(); if (!disposed) sync(); }
+      }
+    }
+
+    async function prepareUpgrade() {
+      if (upgradeAttempted || quality === 0 || disposed || disabled()) return;
+      upgradeAttempted = true;
+      try {
+        // Wait for the entire high-quality file, so switching cannot introduce
+        // another slow-network stall. The low-quality video continues throughout.
+        const response = await fetch(assetRoot+variants[0],{signal:events.signal,cache:'force-cache',priority:'low'});
+        if (!response.ok) throw new Error('Upgrade download failed');
+        const blob = await response.blob();
+        if (disposed || disabled() || !blob.size) return;
+        upgradeURL = URL.createObjectURL(blob);
+        const next = document.createElement('video'); upgradeVideo = next;
+        next.className = 'hero-film-video'; next.dataset.quality = '1080';
+        next.muted = true; next.defaultMuted = true; next.playsInline = true; next.loop = true;
+        next.preload = 'auto'; next.setAttribute('aria-hidden','true'); next.disablePictureInPicture = true;
+        next.src = upgradeURL;
+        video.parentElement.append(next);
+        await mediaStep(next,'loadeddata',() => next.load(),() => next.readyState >= 2);
+        await promoteUpgrade();
+      } catch { if (!disposed) discardUpgrade(); }
+    }
+
     function bufferAhead() {
       for (let i = 0; i < video.buffered.length; i++) {
         if (video.buffered.start(i) <= video.currentTime + .05 && video.buffered.end(i) > video.currentTime) {
@@ -327,12 +431,14 @@ window.DaisyHeroVideo = (() => {
     }
 
     async function resume() {
-      if (disabled() || disposed || !visible || document.hidden) return;
+      if (disabled() || disposed || promoting || !visible || document.hidden) return;
       prepare();
       if (seekTo !== null || video.seeking) return;
       const ahead = bufferAhead();
       const remaining = video.duration - video.currentTime;
       const complete = ahead > 0 && remaining > 0 && ahead >= remaining - .1;
+      const fullyLoaded = video.buffered.length === 1 && video.buffered.start(0) <= .05 && video.buffered.end(0) >= video.duration - .1;
+      if (fullyLoaded) prepareUpgrade();
       if (complete) releaseContent();
       if (playPending) return;
       // Some browsers cap a paused preload at a few seconds. HAVE_ENOUGH_DATA
@@ -357,6 +463,7 @@ window.DaisyHeroVideo = (() => {
 
     function sync() {
       if (disabled() || document.hidden || !visible) {
+        promotionController?.abort(); upgradeVideo?.pause();
         clearTimeout(stallTimer);
         generation++; playPending = false;
         video.pause();
@@ -380,21 +487,25 @@ window.DaisyHeroVideo = (() => {
         video.removeAttribute('src'); video.load(); releaseContent();
       }
     }
-    on(video, 'playing', () => { clearTimeout(stallTimer); playing = true; video.classList.add('is-playing'); });
-    on(video, 'waiting', () => {
-      clearTimeout(stallTimer);
-      // A loop boundary can emit waiting even when the next frame arrives promptly.
-      if (playing && visible && !document.hidden) stallTimer = setTimeout(downgrade, 1500);
-    });
-    on(video, 'error', downgrade);
-    on(video, 'loadedmetadata', () => {
-      if (seekTo !== null) {
-        const time = Math.min(seekTo, Math.max(0,video.duration - .2));
-        seekTo = null; video.currentTime = time;
-      }
-      resume();
-    });
-    for (const event of ['progress','canplay','canplaythrough','seeked']) on(video,event,resume);
+    function bindMedia(target) {
+      const mediaOn = (event,handler) => on(target,event,() => { if (video === target) handler(); });
+      mediaOn('playing', () => { clearTimeout(stallTimer); playing = true; video.classList.add('is-playing'); promoteUpgrade(); });
+      mediaOn('waiting', () => {
+        clearTimeout(stallTimer);
+        // A loop boundary can emit waiting even when the next frame arrives promptly.
+        if (playing && visible && !document.hidden) stallTimer = setTimeout(downgrade, 1500);
+      });
+      mediaOn('error', downgrade);
+      mediaOn('loadedmetadata', () => {
+        if (seekTo !== null) {
+          const time = Math.min(seekTo, Math.max(0,video.duration - .2));
+          seekTo = null; video.currentTime = time;
+        }
+        resume();
+      });
+      for (const event of ['progress','canplay','canplaythrough','seeked']) mediaOn(event,resume);
+    }
+    bindMedia(video);
     on(document, 'visibilitychange', sync);
     on(motion, 'change', sync);
     if (connection) on(connection, 'change', sync);
@@ -403,6 +514,7 @@ window.DaisyHeroVideo = (() => {
     sync();
     dispose = () => {
       disposed = true; generation++; clearTimeout(stallTimer); events.abort(); viewport.disconnect(); releaseContent();
+      discardUpgrade();
       video.pause(); video.removeAttribute('src'); video.load();
     };
   }
