@@ -9,6 +9,7 @@
 .weixin-button:disabled{background:#e5ebe6;border-color:#d5dfd7;color:#526558;cursor:default;transform:none}
 .weixin-button:disabled .weixin-logo{filter:brightness(0)}
 .weixin-qr{width:224px;max-width:100%;margin:0;flex-shrink:0}
+.weixin-qr-userid{margin:0 0 12px;font-size:28px;font-weight:650;line-height:1.2;letter-spacing:-.5px;text-align:center;overflow-wrap:anywhere}
 .weixin-qr-open{display:block;width:100%;padding:0;border:1px solid #aebeb4;border-radius:10px;background:#fff;overflow:hidden;box-shadow:0 2px 5px #20383110;cursor:zoom-in}
 .weixin-qr-open:hover{border-color:#203831;box-shadow:0 4px 12px #20383120}
 /* Frame the QR and its white margin from the unmodified 888 × 1137 photo. */
