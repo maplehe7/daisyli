@@ -19,7 +19,7 @@
 .home-intro>.hero-photo>img,.home-intro>.hero-photo>video{filter:saturate(1.1) contrast(1.03)}
 .home-intro>.hero-photo::after{
   content:"";position:absolute;inset:0;
-  background:linear-gradient(180deg,#0000000a,#0000001e 48%,#0000000a);
+  background:linear-gradient(180deg,#00000000,#00000014 48%,#00000000);
   pointer-events:none;
 }
 .home-intro .home-hero{
@@ -105,7 +105,7 @@ html[lang=zh-Hans] .home-intro .hero-copy h1{font-size:clamp(52px,5.2vw,72px);li
   transition:transform .24s ease,background-color .2s ease,color .2s ease;
 }
 .home-page .site-header.home-header-hidden{transform:translateY(-100%);pointer-events:none}
-.home-page .site-header.home-header-clear{background:transparent;color:#fff;border-color:transparent;box-shadow:none}
+.home-page .site-header.home-header-clear{background:linear-gradient(180deg,#0000001a,#0000000a 72%,#00000000);color:#fff;border-color:transparent;box-shadow:none}
 .home-page .home-header-clear .brand img{filter:invert(1)}
 .home-page .home-header-clear .brand>span,.home-page .home-header-clear #main-nav>a{text-shadow:0 1px 4px #0008}
 .home-page .home-header-clear #main-nav{background:transparent;border-color:transparent}
