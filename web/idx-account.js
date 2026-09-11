@@ -63,7 +63,7 @@ window.DaisyAccount=(()=>{
     const container=document.getElementById('account-page');if(!container)return;
     await stateReady;if(!container.isConnected)return;
     if(!user){container.innerHTML=`<div class="account-signin">${authForm()}</div>`;applyLanguage(container);bindSocial(container);return;}
-    const params=new URLSearchParams(location.search),tab=params.get('tab')||'homes',page=Math.max(1,parseInt(params.get('page'))||1);
+    const params=new URLSearchParams(location.search),requestedTab=params.get('tab'),tab=['homes','searches','profile'].includes(requestedTab)?requestedTab:'homes',page=Math.max(1,parseInt(params.get('page'))||1);
     container.innerHTML=`<div class="account-toolbar"><nav class="account-tabs" aria-label="My Account"><a href="/account?tab=homes" ${tab==='homes'?'aria-current="page"':''}>Saved homes</a><a href="/account?tab=searches" ${tab==='searches'?'aria-current="page"':''}>Saved searches</a><a href="/account?tab=profile" ${tab==='profile'?'aria-current="page"':''}>Profile</a></nav><button class="text-link" data-sign-out>Sign out</button></div><div id="account-content">${idxLoading()}</div>`;
     const content=container.querySelector('#account-content');applyLanguage(container);
     try{
@@ -81,7 +81,11 @@ window.DaisyAccount=(()=>{
       paint();applyLanguage(container);
     }catch(error){if(container.isConnected){content.innerHTML=`<div class="empty-state"><p>${escapeHTML(error.message)}</p><button class="button" data-account-retry>Try again</button></div>`;applyLanguage(content);}}
   }
-  function accountPager(tab,page,total){const pages=Math.ceil(total/20);return pages>1?`<nav class="idx-pagination" aria-label="Search result pages">${page>1?`<a class="button button-outline" href="/account?tab=${tab}&page=${page-1}">Previous</a>`:'<span></span>'}<span>Page ${page} of ${pages}</span>${page<pages?`<a class="button button-outline" href="/account?tab=${tab}&page=${page+1}">Next</a>`:'<span></span>'}</nav>`:'';}
+  function accountPager(tab,page,total){
+    const pages=Math.ceil(total/20);
+    const href=nextPage=>escapeHTML('/account?'+new URLSearchParams({tab,page:String(nextPage)}));
+    return pages>1?`<nav class="idx-pagination" aria-label="Search result pages">${page>1?`<a class="button button-outline" href="${href(page-1)}">Previous</a>`:'<span></span>'}<span>Page ${page} of ${pages}</span>${page<pages?`<a class="button button-outline" href="${href(page+1)}">Next</a>`:'<span></span>'}</nav>`:'';
+  }
   async function getSearch(id){if(searches.has(String(id)))return searches.get(String(id));let page=1;while(page<=50){const result=await DaisyIDX.request('account/searches',{page});for(const row of result.rows||[])searches.set(String(row.id),row);if(searches.has(String(id)))return searches.get(String(id));if(page*20>=Number(result.total)||!(result.rows||[]).length)break;page++;}throw Error('Search not found.');}
   function splitSearch(record){const raw=String(record.searchUrl||record.url||'results').replace(/^https?:\/\/[^/]+\/idx\//,'').replace(/^\/?idx\//,'').replace(/^\//,'');const [pageType,...segments]=raw.split('/');return {pageType,query:segments.length?'/'+segments.join('/'):''};}
   function searchURL(record,edit=false){const {pageType,query}=splitSearch(record);const params=new URLSearchParams({native:query,collection:pageType,run:edit?'0':'1'});if(edit)params.set('editSearch',String(record.id));return '/search?'+params;}
