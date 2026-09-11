@@ -249,29 +249,22 @@ window.DaisyVideos = (() => {
   return {render, bind};
 })();
 
-/* The same silent edit, with bandwidth-sized encodes and a buffered start. */
+/* Download each edit once. Stream from retained bytes, then loop a complete local Blob. */
 window.DaisyHeroVideo = (() => {
   const assetRoot = '/assets/home-film-v4/';
-  const variants = ['film-1080-lite.mp4','film-720-lite.mp4','film-480-lite.mp4'];
+  const variants = ['film-1080-stream.mp4','film-720-stream.mp4'];
+  const codec = 'video/mp4; codecs="avc1.640028"';
   let dispose;
   let ready = Promise.resolve();
-
   function afterBuffered(callback) { return ready.then(callback); }
-
-  // Native lazy loading may still fetch several screens ahead. Keep those requests
-  // out of the hero's initial download, then restore normal lazy loading.
   function deferImages(markup) {
     return markup.replace(/<img\b[^>]*>/g, tag => tag.includes('fetchpriority="high"') ? tag : tag.replace(' src="',' data-home-src="'));
   }
-
   function render() {
     return `<div class="hero-photo hero-film"><img class="hero-film-poster" src="${assetRoot}poster-lite.jpg" alt="" fetchpriority="high" width="1280" height="720"><video class="hero-film-video" muted loop playsinline preload="auto" poster="${assetRoot}poster-lite.jpg" aria-hidden="true" disablepictureinpicture></video></div>`;
   }
-
   function bind() {
-    dispose?.();
-    dispose = null;
-    ready = Promise.resolve();
+    dispose?.(); dispose = null; ready = Promise.resolve();
     const intro = document.querySelector('.home-intro');
     if (intro && !intro.querySelector('.hero-film-video')) {
       intro.querySelector(':scope > .hero-photo').outerHTML = render();
@@ -282,53 +275,51 @@ window.DaisyHeroVideo = (() => {
     const motion = matchMedia('(prefers-reduced-motion: reduce)');
     const connection = navigator.connection;
     const events = new AbortController();
-    const on = (target, event, handler) => target.addEventListener(event, handler, {signal:events.signal});
-    // 720p stays clear on phones; reserve 480p for an actual sustained stall.
-    let quality = innerWidth > 900 && connection?.downlink >= 8 ? 0 : 1;
-    let started = false, disposed = false, visible = true, blocked = false;
-    let buffering = true, playing = false, playPending = false, seekTo = null, lowStalls = 0;
-    let generation = 0, released = false, releaseReady, stallTimer;
-    let upgradeAttempted = false, upgradeVideo = null, upgradeURL = null, promoting = false, promotionController;
+    const on = (target,event,handler) => target.addEventListener(event,handler,{signal:events.signal});
+    const assets = variants.map((name,quality) => ({name,quality,chunks:[],bytes:0,url:null}));
+    const urls = new Set();
+    let disposed = false, visible = true, blocked = false, started = false;
+    let buffering = true, playPending = false, generation = 0, released = false, releaseReady;
+    let candidate = null, promoting = false, promotionController;
     ready = new Promise(resolve => { releaseReady = resolve; });
     const deferredImages = [...document.querySelectorAll('[data-home-src]')];
-    const releaseTimer = setTimeout(releaseContent, 12000);
-    video.muted = true;
-    video.defaultMuted = true;
-    video.autoplay = false;
+    const releaseTimer = setTimeout(releaseContent,12000);
+    configure(video);
 
+    function configure(target) {
+      target.muted = true; target.defaultMuted = true; target.autoplay = false;
+      target.loop = true; target.playsInline = true; target.preload = 'auto';
+      target.disableRemotePlayback = true; target.disablePictureInPicture = true;
+    }
+    function localURL(value) { const url = URL.createObjectURL(value); urls.add(url); return url; }
+    function revoke(url) { if (urls.delete(url)) URL.revokeObjectURL(url); }
     function releaseContent() {
       if (released) return;
-      released = true;
-      clearTimeout(releaseTimer);
+      released = true; clearTimeout(releaseTimer);
       if (!disposed) deferredImages.forEach(image => {
         if (!image.isConnected) return;
-        image.src = image.dataset.homeSrc;
-        image.removeAttribute('data-home-src');
+        image.src = image.dataset.homeSrc; image.removeAttribute('data-home-src');
       });
       releaseReady();
     }
-
     function disabled() { return blocked || motion.matches || connection?.saveData; }
-
-    function mediaStep(target, event, action, complete, signal = events.signal) {
+    function mediaStep(target,event,action,complete,signal=events.signal) {
       return new Promise((resolve,reject) => {
         const finish = error => {
-          clearTimeout(timer); target.removeEventListener(event,done);
-          target.removeEventListener('error',failed); signal.removeEventListener('abort',aborted);
-          if (error) reject(error); else resolve();
+          clearTimeout(timer); target.removeEventListener(event,done); target.removeEventListener('error',failed);
+          signal.removeEventListener('abort',aborted); error ? reject(error) : resolve();
         };
         const done = () => finish();
-        const failed = () => finish(new Error('Upgrade video could not decode'));
+        const failed = () => finish(new Error('Video preparation failed'));
         const aborted = () => finish(new DOMException('Video preparation cancelled','AbortError'));
         const timer = setTimeout(failed,15000);
         target.addEventListener(event,done,{once:true}); target.addEventListener('error',failed,{once:true});
         signal.addEventListener('abort',aborted,{once:true});
         if (signal.aborted) { aborted(); return; }
-        try { action(); if (complete()) done(); } catch (error) { finish(error); }
+        try { action(); if (complete()) done(); } catch(error) { finish(error); }
       });
     }
-
-    function paintedFrame(target, signal) {
+    function paintedFrame(target,signal) {
       return new Promise((resolve,reject) => {
         let frame, fallbackFrame;
         const finish = error => {
@@ -338,185 +329,212 @@ window.DaisyHeroVideo = (() => {
           error ? reject(error) : resolve();
         };
         const abort = () => finish(new DOMException('Video handoff cancelled','AbortError'));
-        const timer = setTimeout(() => finish(new Error('Upgrade frame timed out')),15000);
+        const timer = setTimeout(() => finish(new Error('Video frame timed out')),15000);
         signal.addEventListener('abort',abort,{once:true});
         if (signal.aborted) { abort(); return; }
         if (target.requestVideoFrameCallback) frame = target.requestVideoFrameCallback(() => finish());
         else fallbackFrame = requestAnimationFrame(() => { fallbackFrame = requestAnimationFrame(() => finish()); });
       });
     }
-
-    function discardUpgrade() {
-      if (upgradeVideo) {
-        upgradeVideo.pause(); upgradeVideo.removeAttribute('src'); upgradeVideo.load(); upgradeVideo.remove();
-        upgradeVideo = null;
-      }
-      if (upgradeURL) { URL.revokeObjectURL(upgradeURL); upgradeURL = null; }
+    function removeVideo(target) {
+      const url = target.src;
+      target.pause(); target.removeAttribute('src'); target.load(); target.remove();
+      // Completed Blob URLs belong to their asset and remain alive until navigation.
+      if (!assets.some(asset => asset.url === url)) revoke(url);
     }
-
-    async function promoteUpgrade() {
-      if (!upgradeVideo || upgradeVideo.readyState < 2 || promoting || disposed || disabled() || !visible || document.hidden || video.paused) return;
+    async function promote() {
+      if (!candidate || candidate.readyState < 2 || promoting || disposed || disabled() || !visible || document.hidden) return;
       promoting = true;
-      const previous = video, next = upgradeVideo;
+      const previous = video, next = candidate;
       const stage = new AbortController(); promotionController = stage;
-      const cancel = () => stage.abort();
-      events.signal.addEventListener('abort',cancel,{once:true});
-      clearTimeout(stallTimer);
-      // Hold the last low-quality frame during the local seek. Never expose the
-      // new video's opening frame or its poster while it catches up.
+      const cancel = () => stage.abort(); events.signal.addEventListener('abort',cancel,{once:true});
       previous.pause(); generation++; playPending = false;
       try {
-        const position = previous.currentTime % next.duration;
+        const position = (previous.currentTime || 0) % next.duration;
         await mediaStep(next,'seeked',() => { next.currentTime = position; },
           () => !next.seeking && Math.abs(next.currentTime-position) < .05,stage.signal);
         next.playbackRate = previous.playbackRate;
-        const frame = paintedFrame(next,stage.signal);
-        await Promise.all([next.play(),frame]);
+        await Promise.all([next.play(),paintedFrame(next,stage.signal)]);
         if (stage.signal.aborted || disposed || disabled() || !visible || document.hidden) return;
-        video = next; upgradeVideo = null; quality = 0;
-        buffering = false; playing = true; seekTo = null; lowStalls = 0;
-        bindMedia(video);
-        video.style.transition = 'none'; // The ready HD frame replaces the held frame without a poster fade.
-        video.classList.add('is-playing');
-        previous.classList.remove('is-playing');
-        previous.removeAttribute('src'); previous.load(); previous.remove();
-      } catch (error) {
-        if (!stage.signal.aborted) discardUpgrade();
+        video = next; candidate = null; buffering = false;
+        bindMedia(video); video.style.transition = 'none'; video.classList.add('is-playing');
+        removeVideo(previous);
+      } catch(error) {
+        if (!stage.signal.aborted && candidate === next) { candidate = null; removeVideo(next); }
       } finally {
-        events.signal.removeEventListener('abort',cancel);
-        promoting = false; promotionController = null;
-        // Returning from a hidden tab resumes at the same position and retries
-        // the already-downloaded upgrade, without another network request.
-        if (video === previous) { next.pause(); if (!disposed) sync(); }
+        events.signal.removeEventListener('abort',cancel); promoting = false; promotionController = null;
+        if (video === previous) { next.pause(); if (!disposed) resume(); }
       }
     }
-
-    async function prepareUpgrade() {
-      if (upgradeAttempted || quality === 0 || disposed || disabled()) return;
-      upgradeAttempted = true;
+    async function useBlob(asset) {
+      if (disposed || disabled()) return;
+      if (candidate) { promotionController?.abort(); removeVideo(candidate); candidate = null; }
+      const next = document.createElement('video'); configure(next);
+      next.className = 'hero-film-video'; next.dataset.quality = asset.quality === 0 ? '1080' : '720';
+      next.dataset.complete = 'true'; next.setAttribute('aria-hidden','true');
+      candidate = next; next.src = asset.url; video.parentElement.append(next);
       try {
-        // Wait for the entire high-quality file, so switching cannot introduce
-        // another slow-network stall. The low-quality video continues throughout.
-        const response = await fetch(assetRoot+variants[0],{signal:events.signal,cache:'force-cache',priority:'low'});
-        if (!response.ok) throw new Error('Upgrade download failed');
-        const blob = await response.blob();
-        if (disposed || disabled() || !blob.size) return;
-        upgradeURL = URL.createObjectURL(blob);
-        const next = document.createElement('video'); upgradeVideo = next;
-        next.className = 'hero-film-video'; next.dataset.quality = '1080';
-        next.muted = true; next.defaultMuted = true; next.playsInline = true; next.loop = true;
-        next.preload = 'auto'; next.setAttribute('aria-hidden','true'); next.disablePictureInPicture = true;
-        next.src = upgradeURL;
-        video.parentElement.append(next);
         await mediaStep(next,'loadeddata',() => next.load(),() => next.readyState >= 2);
-        await promoteUpgrade();
-      } catch { if (!disposed) discardUpgrade(); }
+        await promote();
+      } catch { if (!disposed && candidate === next) { candidate = null; removeVideo(next); } }
     }
-
     function bufferAhead() {
-      for (let i = 0; i < video.buffered.length; i++) {
-        if (video.buffered.start(i) <= video.currentTime + .05 && video.buffered.end(i) > video.currentTime) {
-          return video.buffered.end(i) - video.currentTime;
-        }
+      for (let i=0; i<video.buffered.length; i++) {
+        if (video.buffered.start(i) <= video.currentTime+.05 && video.buffered.end(i) > video.currentTime)
+          return video.buffered.end(i)-video.currentTime;
       }
       return 0;
     }
-
-    function prepare() {
-      if (started || disposed) return;
-      started = true;
-      video.src = assetRoot + variants[quality];
-      video.dataset.quality = ['1080','720','480'][quality];
-      video.load();
-    }
-
     async function resume() {
       if (disabled() || disposed || promoting || !visible || document.hidden) return;
-      prepare();
-      if (seekTo !== null || video.seeking) return;
-      const ahead = bufferAhead();
-      const remaining = video.duration - video.currentTime;
-      const complete = ahead > 0 && remaining > 0 && ahead >= remaining - .1;
-      const fullyLoaded = video.buffered.length === 1 && video.buffered.start(0) <= .05 && video.buffered.end(0) >= video.duration - .1;
-      if (fullyLoaded) prepareUpgrade();
-      if (complete) releaseContent();
-      if (playPending) return;
-      // Some browsers cap a paused preload at a few seconds. HAVE_ENOUGH_DATA
-      // lets their own throughput estimate start playback and continue fetching.
-      const enough = ahead >= (quality === 2 ? 6 : 3) || complete || (ahead > 0 && video.readyState === 4);
-      if (buffering && !enough) return;
+      if (candidate?.readyState >= 2) { promote(); return; }
+      if (!video.src || video.seeking || playPending) return;
+      // Fragmented H.264 can begin a few frames after zero because of B-frames.
+      // Seek to that first buffered frame instead of waiting for nonexistent data.
+      if (video.buffered.length && video.currentTime < video.buffered.start(0) && video.buffered.start(0) < .2) {
+        video.currentTime = video.buffered.start(0); return;
+      }
+      const ahead = bufferAhead(), remaining = video.duration-video.currentTime;
+      const complete = video.dataset.complete === 'true' || (ahead > 0 && remaining > 0 && ahead >= remaining-.1);
+      if (buffering && ahead < 3 && !complete) return;
       buffering = false;
       if (!video.paused) return;
-      const request = generation;
-      playPending = true;
-      try {
-        await video.play();
-      } catch (error) {
-        // Visibility and source switches can cancel play without blocking autoplay.
+      const request = generation; playPending = true;
+      try { await video.play(); }
+      catch(error) {
         if (!disposed && request === generation && error.name !== 'AbortError') {
           blocked = true; video.classList.remove('is-playing'); releaseContent();
         }
-      } finally {
-        if (request === generation) playPending = false;
-      }
-    }
-
-    function sync() {
-      if (disabled() || document.hidden || !visible) {
-        promotionController?.abort(); upgradeVideo?.pause();
-        clearTimeout(stallTimer);
-        generation++; playPending = false;
-        video.pause();
-        if (disabled()) video.classList.remove('is-playing');
-        releaseContent();
-      }
-      else resume();
-    }
-    function downgrade() {
-      if (disposed || disabled()) return;
-      video.pause();
-      video.classList.remove('is-playing');
-      buffering = true; playing = false; playPending = false; generation++;
-      if (quality < variants.length - 1) {
-        seekTo = video.currentTime || 0;
-        quality++; started = false;
-        prepare();
-      } else if (++lowStalls >= 2) {
-        // A very weak connection gets a stable poster instead of repeated freezing.
-        blocked = true;
-        video.removeAttribute('src'); video.load(); releaseContent();
-      }
+      } finally { if (request === generation) playPending = false; }
     }
     function bindMedia(target) {
       const mediaOn = (event,handler) => on(target,event,() => { if (video === target) handler(); });
-      mediaOn('playing', () => { clearTimeout(stallTimer); playing = true; video.classList.add('is-playing'); promoteUpgrade(); });
-      mediaOn('waiting', () => {
-        clearTimeout(stallTimer);
-        // A loop boundary can emit waiting even when the next frame arrives promptly.
-        if (playing && visible && !document.hidden) stallTimer = setTimeout(downgrade, 1500);
-      });
-      mediaOn('error', downgrade);
-      mediaOn('loadedmetadata', () => {
-        if (seekTo !== null) {
-          const time = Math.min(seekTo, Math.max(0,video.duration - .2));
-          seekTo = null; video.currentTime = time;
+      mediaOn('playing',() => { video.classList.add('is-playing'); });
+      // Decoder/loop waits are not evidence of a slow connection. Never replace
+      // a downloaded source, or start a lower-quality request, because of waiting.
+      mediaOn('waiting',() => {
+        if (video.dataset.complete !== 'true' && !video.seeking && bufferAhead() < .2 && !promoting) {
+          buffering = true; generation++; playPending = false; video.pause();
         }
-        resume();
       });
       for (const event of ['progress','canplay','canplaythrough','seeked']) mediaOn(event,resume);
     }
+
+    async function openStream(asset) {
+      const Source = [window.MediaSource,window.ManagedMediaSource].find(Type => Type?.isTypeSupported?.(codec));
+      if (!Source) return null; // Older browsers play the completed Blob instead.
+      const media = new Source(), target = video;
+      target.dataset.quality = asset.quality === 0 ? '1080' : '720';
+      const url = localURL(media);
+      try {
+        await mediaStep(media,'sourceopen',() => { target.src = url; target.load(); },() => media.readyState === 'open');
+        const buffer = media.addSourceBuffer(codec);
+        return {
+          async append(chunk) {
+            if (disposed || video !== target) return;
+            await mediaStep(buffer,'updateend',() => buffer.appendBuffer(chunk),() => !buffer.updating);
+            resume();
+          },
+          finish() { if (media.readyState === 'open' && !buffer.updating) media.endOfStream(); }
+        };
+      } catch { return null; }
+    }
+    async function download(asset,{progressive=false,probe=false}={}) {
+      if (asset.url) return true;
+      const transfer = new AbortController();
+      const cancel = () => transfer.abort(); events.signal.addEventListener('abort',cancel,{once:true});
+      let timer, slower = false, decided = !probe, stream = null, appended = 0;
+      const began = performance.now();
+      if (probe) timer = setTimeout(() => { if (!decided) { slower = true; transfer.abort(); } },1800);
+      try {
+        const offset = asset.bytes;
+        const response = await fetch(assetRoot+asset.name,{
+          signal:transfer.signal,cache:'force-cache',priority:progressive?'high':'low',
+          ...(offset ? {headers:{Range:`bytes=${offset}-`}} : {})
+        });
+        if (!response.ok) throw new Error('Video download failed');
+        // If a host ignores Range, treat its full response as a fresh file.
+        if (offset && response.status !== 206) { asset.chunks = []; asset.bytes = 0; }
+        const reader = response.body?.getReader();
+        if (!reader) {
+          clearTimeout(timer); const data = new Uint8Array(await response.arrayBuffer());
+          asset.chunks.push(data); asset.bytes += data.byteLength;
+        } else {
+          while (true) {
+            const {done,value} = await reader.read();
+            if (done) break;
+            asset.chunks.push(value); asset.bytes += value.byteLength;
+            if (!decided && asset.bytes >= 192*1024) {
+              decided = true; clearTimeout(timer);
+              // Measure real delivery, including latency. Screen size and stale
+              // navigator.connection estimates must not force a fast phone to 720p.
+              if (asset.bytes*8/Math.max(1,performance.now()-began)/1000 < 4) {
+                slower = true; transfer.abort(); return false;
+              }
+            }
+            if (progressive && decided) {
+              if (appended === 0) stream = await openStream(asset);
+              while (appended < asset.chunks.length) {
+                const chunk = asset.chunks[appended++];
+                if (stream) {
+                  try { await stream.append(chunk); }
+                  catch { stream = null; } // Preserve bytes for the Blob fallback.
+                }
+              }
+            }
+          }
+        }
+        if (disposed || !asset.bytes) return false;
+        clearTimeout(timer);
+        try { stream?.finish(); } catch { /* The complete file still works as a Blob. */ }
+        asset.url = localURL(new Blob(asset.chunks,{type:'video/mp4'}));
+        asset.chunks = [];
+        return true;
+      } catch(error) {
+        if (slower) return false;
+        throw error;
+      } finally { clearTimeout(timer); events.signal.removeEventListener('abort',cancel); }
+    }
+    async function start() {
+      if (started || disposed || disabled()) return;
+      started = true;
+      try {
+        // Probe using the beginning of the actual HD download. Fast delivery keeps
+        // that same request; slow delivery retains its prefix for the later upgrade.
+        let high = false;
+        try { high = await download(assets[0],{progressive:true,probe:true}); }
+        catch(error) { if (disposed) return; }
+        if (disposed || disabled()) return;
+        if (high) { releaseContent(); await useBlob(assets[0]); return; }
+        if (!await download(assets[1],{progressive:true}) || disposed) return;
+        releaseContent(); await useBlob(assets[1]);
+        if (disposed || disabled()) return;
+        // The complete low-quality file now loops locally while HD finishes.
+        if (await download(assets[0])) await useBlob(assets[0]);
+      } catch { releaseContent(); } // Keep a working low-quality loop or the poster.
+      finally { if (!disposed && disabled()) started = false; }
+    }
+    function sync() {
+      if (disabled() || document.hidden || !visible) {
+        promotionController?.abort(); candidate?.pause();
+        generation++; playPending = false; video.pause();
+        if (disabled()) video.classList.remove('is-playing');
+        releaseContent();
+      } else { start(); resume(); }
+    }
     bindMedia(video);
-    on(document, 'visibilitychange', sync);
-    on(motion, 'change', sync);
-    if (connection) on(connection, 'change', sync);
-    const viewport = new IntersectionObserver(entries => { visible = entries[0].isIntersecting; sync(); }, {threshold:0.01});
-    viewport.observe(video.closest('.home-intro'));
-    sync();
+    on(document,'visibilitychange',sync); on(motion,'change',sync);
+    if (connection) on(connection,'change',sync);
+    const viewport = new IntersectionObserver(entries => { visible = entries[0].isIntersecting; sync(); },{threshold:.01});
+    viewport.observe(intro);
     dispose = () => {
-      disposed = true; generation++; clearTimeout(stallTimer); events.abort(); viewport.disconnect(); releaseContent();
-      discardUpgrade();
+      disposed = true; generation++; events.abort(); viewport.disconnect(); releaseContent();
+      if (candidate) removeVideo(candidate);
       video.pause(); video.removeAttribute('src'); video.load();
+      for (const url of [...urls]) revoke(url);
+      assets.forEach(asset => { asset.chunks = []; });
     };
+    sync();
   }
-  return {render, bind, afterBuffered, deferImages};
+  return {render,bind,afterBuffered,deferImages};
 })();

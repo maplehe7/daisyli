@@ -23,6 +23,14 @@ for (const variant of variants) {
     '-threads','4','-pix_fmt','yuv420p','-profile:v','high','-level:v','4.0',
     '-g','48','-keyint_min','24','-movflags','+faststart',path.join(folder,variant.name)]);
   console.log(variant.name, fs.statSync(path.join(folder,variant.name)).size);
+  if (variant.width >= 1280) {
+    const streamName = variant.name.replace('-lite','-stream');
+    // Fragment the same encoded frames for progressive MediaSource playback.
+    // Retained bytes also form a normal MP4 Blob, without another download.
+    run(['-i',path.join(folder,variant.name),'-c','copy',
+      '-movflags','+frag_keyframe+empty_moov+default_base_moof',path.join(folder,streamName)]);
+    console.log(streamName, fs.statSync(path.join(folder,streamName)).size);
+  }
 }
 run(['-i',path.join(folder,'poster.jpg'),'-vf','scale=1280:-2','-frames:v','1','-q:v','6',path.join(folder,'poster-lite.jpg')]);
 console.log('poster-lite.jpg', fs.statSync(path.join(folder,'poster-lite.jpg')).size);
