@@ -87,6 +87,7 @@ html[lang=zh-Hans] .home-intro .hero-copy h1{font-size:clamp(52px,5.2vw,72px);li
   .home-search-field{padding-inline:14px;gap:10px}
   .home-search-field>svg{width:18px;height:18px}
   .home-search-field input[type=search]{height:44px;font-size:16px}
+  .home-search-field input[type=search]::placeholder{font-size:clamp(11px,3.4vw,13px)}
   .home-intro .home-search-button{min-height:44px;font-size:14px;padding:10px}
 }
 @media(max-height:540px) and (min-width:601px){

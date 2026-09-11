@@ -203,7 +203,9 @@ window.DaisyVideos = (() => {
   }
 
   function warm() {
-    ensurePlayer(selectedId).catch(() => {});
+    window.DaisyHeroVideo.afterBuffered(() => {
+      if (document.getElementById('featured-videos')) ensurePlayer(selectedId).catch(() => {});
+    });
   }
 
   function bind() {
@@ -247,18 +249,29 @@ window.DaisyVideos = (() => {
   return {render, bind};
 })();
 
-/* Selected property clips are trimmed, joined, and rendered at 2x with no audio. */
+/* The same silent edit, with bandwidth-sized encodes and a buffered start. */
 window.DaisyHeroVideo = (() => {
   const assetRoot = '/assets/home-film-v4/';
+  const variants = ['film-1080-lite.mp4','film-720-lite.mp4','film-480-lite.mp4'];
   let dispose;
+  let ready = Promise.resolve();
+
+  function afterBuffered(callback) { return ready.then(callback); }
+
+  // Native lazy loading may still fetch several screens ahead. Keep those requests
+  // out of the hero's initial download, then restore normal lazy loading.
+  function deferImages(markup) {
+    return markup.replace(/<img\b[^>]*>/g, tag => tag.includes('fetchpriority="high"') ? tag : tag.replace(' src="',' data-home-src="'));
+  }
 
   function render() {
-    return `<div class="hero-photo hero-film"><img class="hero-film-poster" src="${assetRoot}poster.jpg?rev=golf-opening" alt="" fetchpriority="high" width="1920" height="1080"><video class="hero-film-video" muted autoplay loop playsinline preload="metadata" poster="${assetRoot}poster.jpg?rev=golf-opening" aria-hidden="true" disablepictureinpicture></video></div>`;
+    return `<div class="hero-photo hero-film"><img class="hero-film-poster" src="${assetRoot}poster-lite.jpg" alt="" fetchpriority="high" width="1280" height="720"><video class="hero-film-video" muted loop playsinline preload="auto" poster="${assetRoot}poster-lite.jpg" aria-hidden="true" disablepictureinpicture></video></div>`;
   }
 
   function bind() {
     dispose?.();
     dispose = null;
+    ready = Promise.resolve();
     const intro = document.querySelector('.home-intro');
     if (intro && !intro.querySelector('.hero-film-video')) {
       intro.querySelector(':scope > .hero-photo').outerHTML = render();
@@ -267,45 +280,131 @@ window.DaisyHeroVideo = (() => {
     const video = document.querySelector('.hero-film-video');
     if (!video) return;
     const motion = matchMedia('(prefers-reduced-motion: reduce)');
+    const connection = navigator.connection;
     const events = new AbortController();
     const on = (target, event, handler) => target.addEventListener(event, handler, {signal:events.signal});
-    let started = false, disposed = false, visible = true, paused = motion.matches;
+    const slow = /(^|-)2g$|3g/.test(connection?.effectiveType || '') || (connection?.downlink > 0 && connection.downlink < 2);
+    let quality = slow ? 2 : (innerWidth > 900 && connection?.downlink >= 8 ? 0 : 1);
+    let started = false, disposed = false, visible = true, blocked = false;
+    let buffering = true, playing = false, playPending = false, seekTo = null, lowStalls = 0;
+    let generation = 0, released = false, releaseReady, stallTimer;
+    ready = new Promise(resolve => { releaseReady = resolve; });
+    const deferredImages = [...document.querySelectorAll('[data-home-src]')];
+    const releaseTimer = setTimeout(releaseContent, 12000);
     video.muted = true;
     video.defaultMuted = true;
-    video.autoplay = !paused;
+    video.autoplay = false;
+
+    function releaseContent() {
+      if (released) return;
+      released = true;
+      clearTimeout(releaseTimer);
+      if (!disposed) deferredImages.forEach(image => {
+        if (!image.isConnected) return;
+        image.src = image.dataset.homeSrc;
+        image.removeAttribute('data-home-src');
+      });
+      releaseReady();
+    }
+
+    function disabled() { return blocked || motion.matches || connection?.saveData; }
+
+    function bufferAhead() {
+      for (let i = 0; i < video.buffered.length; i++) {
+        if (video.buffered.start(i) <= video.currentTime + .05 && video.buffered.end(i) > video.currentTime) {
+          return video.buffered.end(i) - video.currentTime;
+        }
+      }
+      return 0;
+    }
 
     function prepare() {
       if (started || disposed) return;
-      video.src = assetRoot + 'film.mp4?rev=golf-opening';
       started = true;
+      video.src = assetRoot + variants[quality];
+      video.dataset.quality = ['1080','720','480'][quality];
+      video.load();
     }
 
     async function resume() {
-      if (paused || disposed || !visible || document.hidden) return;
+      if (disabled() || disposed || !visible || document.hidden) return;
+      prepare();
+      if (seekTo !== null || video.seeking) return;
+      const ahead = bufferAhead();
+      const remaining = video.duration - video.currentTime;
+      const complete = ahead > 0 && remaining > 0 && ahead >= remaining - .1;
+      if (complete) releaseContent();
+      if (playPending) return;
+      // Some browsers cap a paused preload at a few seconds. HAVE_ENOUGH_DATA
+      // lets their own throughput estimate start playback and continue fetching.
+      const enough = ahead >= (quality === 2 ? 6 : 3) || complete || (ahead > 0 && video.readyState === 4);
+      if (buffering && !enough) return;
+      buffering = false;
+      if (!video.paused) return;
+      const request = generation;
+      playPending = true;
       try {
-        prepare();
-        if (paused || disposed || !visible || document.hidden) return;
         await video.play();
-      } catch {
-        if (!disposed && !document.hidden && visible && !paused) paused = true;
+      } catch (error) {
+        // Visibility and source switches can cancel play without blocking autoplay.
+        if (!disposed && request === generation && error.name !== 'AbortError') {
+          blocked = true; video.classList.remove('is-playing'); releaseContent();
+        }
+      } finally {
+        if (request === generation) playPending = false;
       }
     }
 
     function sync() {
-      if (paused || document.hidden || !visible) video.pause();
+      if (disabled() || document.hidden || !visible) {
+        clearTimeout(stallTimer);
+        generation++; playPending = false;
+        video.pause();
+        if (disabled()) video.classList.remove('is-playing');
+        releaseContent();
+      }
       else resume();
     }
-    on(video, 'playing', () => { video.classList.add('is-playing'); });
-    on(video, 'error', () => { video.classList.remove('is-playing'); paused = true; });
+    function downgrade() {
+      if (disposed || disabled()) return;
+      video.pause();
+      video.classList.remove('is-playing');
+      buffering = true; playing = false; playPending = false; generation++;
+      if (quality < variants.length - 1) {
+        seekTo = video.currentTime || 0;
+        quality++; started = false;
+        prepare();
+      } else if (++lowStalls >= 2) {
+        // A very weak connection gets a stable poster instead of repeated freezing.
+        blocked = true;
+        video.removeAttribute('src'); video.load(); releaseContent();
+      }
+    }
+    on(video, 'playing', () => { clearTimeout(stallTimer); playing = true; video.classList.add('is-playing'); });
+    on(video, 'waiting', () => {
+      clearTimeout(stallTimer);
+      // A loop boundary can emit waiting even when the next frame arrives promptly.
+      if (playing && visible && !document.hidden) stallTimer = setTimeout(downgrade, 1500);
+    });
+    on(video, 'error', downgrade);
+    on(video, 'loadedmetadata', () => {
+      if (seekTo !== null) {
+        const time = Math.min(seekTo, Math.max(0,video.duration - .2));
+        seekTo = null; video.currentTime = time;
+      }
+      resume();
+    });
+    for (const event of ['progress','canplay','canplaythrough','seeked']) on(video,event,resume);
     on(document, 'visibilitychange', sync);
-    on(motion, 'change', () => { paused = motion.matches; video.autoplay = !paused; sync(); });
+    on(motion, 'change', sync);
+    if (connection) on(connection, 'change', sync);
     const viewport = new IntersectionObserver(entries => { visible = entries[0].isIntersecting; sync(); }, {threshold:0.01});
     viewport.observe(video.closest('.home-intro'));
     sync();
     dispose = () => {
-      disposed = true; events.abort(); viewport.disconnect();
+      disposed = true; generation++; clearTimeout(stallTimer); events.abort(); viewport.disconnect(); releaseContent();
       video.pause(); video.removeAttribute('src'); video.load();
     };
   }
-  return {render, bind};
+  return {render, bind, afterBuffered, deferImages};
 })();
