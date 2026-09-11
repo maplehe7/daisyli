@@ -19,7 +19,7 @@
 .home-intro>.hero-photo>img,.home-intro>.hero-photo>video{filter:saturate(1.1) contrast(1.03)}
 .home-intro>.hero-photo::after{
   content:"";position:absolute;inset:0;
-  background:linear-gradient(180deg,#00000000,#00000014 48%,#00000000);
+  background:linear-gradient(180deg,#0000000a,#0000001e 48%,#0000000a);
   pointer-events:none;
 }
 .home-intro .home-hero{
