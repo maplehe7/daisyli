@@ -102,7 +102,7 @@ function bindLiveCatalogue(kind){
     const sort=document.getElementById('catalog-sort').value;
     query+='/price_orderBy/'+(sort==='price-asc'?'asc':'desc')+'_order';
     cancelIdxRequests();const id=++requestId;
-    grid.innerHTML=idxLoading();applyLanguage(grid);grid.setAttribute('aria-busy','true');count.textContent='Loading live homes…';
+    grid.innerHTML=idxLoading();applyLanguage(grid);grid.setAttribute('aria-busy','true');count.textContent='';
     section.querySelector('.idx-catalog-extra').innerHTML='';
     try{
       const result=await requestIdx(query,{page,pageType});if(!grid.isConnected||id!==requestId)return;
