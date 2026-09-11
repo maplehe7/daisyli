@@ -12,6 +12,7 @@ let siteLanguage=DaisyLanguage.select({
 const originalTextNodes=new WeakMap();
 const originalAttributes=new WeakMap();
 const chineseUI={
+  'Portfolio':'房产案例','San Diego':'圣迭戈','Rancho Santa Margarita':'兰乔圣玛格丽塔',
   'Text Me':'发短信联系我','Message on Weixin':'微信联系','Weixin QR code':'微信二维码',"Daisy Li's Weixin QR code":'Daisy Li 的微信二维码','Weixin ID':'微信号','Copy':'复制',
   'Tap to enlarge':'点击放大','Enlarge Weixin QR code':'放大微信二维码','Close QR code':'关闭二维码','Close':'关闭',
   'Skip to content':'跳至内容','DESIGN PREVIEW':'设计预览','Your live site is unchanged.':'正式网站尚未更改。',

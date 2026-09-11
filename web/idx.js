@@ -102,7 +102,8 @@
       year:numeric(property.yearBuilt),stories:numeric(property.story),status:property.msText||'View status',mls:property.mlsnumber||'',
       image,source:detailURL(property),live:true,
       latitude:numeric(property.latitude),longitude:numeric(property.longitude),virtualTour:photoURL(property.virtualTour),openStart:property.openStart||'',openEnd:property.openEnd||'',openHid:property.openHid||'',
-      systemId:String(property.systemId||''),updated:property.lastUpdateDate?.date||''
+      systemId:String(property.systemId||''),updated:property.lastUpdateDate?.date||'',
+      collectionOrder:numeric(property.OBCol),isManual:String(property.isManual)==='1'
     };properties.set(String(result.id).toUpperCase(),result);return result;
   }
   async function request(action,params={}, {signal,method='POST'}={}) {
@@ -128,7 +129,49 @@
       return {items:payload.listings.map(normalize),mapItems:(payload.mapData||[]).map(normalize),total:numeric(payload.listings[0]?.overall_count),page,retrievedAt:new Date(),url:resultsURL(query,pageType)};
     } finally {clearTimeout(timeout);signal?.removeEventListener('abort',abort);}
   }
-  const api={origin,cities,filters,resultsURL,detailURL,propertyURL,listings,normalize,request,citiesList,property,properties,photoCandidates};
+  const portfolioDRE='01986831';
+  const portfolioVerification=new Map();
+  let portfolioCache;
+  function representsDaisy(detail){
+    // These are transaction-party fields, not the website's agentInfo contact card.
+    return ['ListAgentDRE','CoAgentDRE','SaleAgentKey'].some(key=>String(detail?.[key]||'').trim()===portfolioDRE);
+  }
+  async function portfolio({signal}={}){
+    if(portfolioCache&&portfolioCache.until>Date.now())return portfolioCache.items;
+    const query='/price_orderBy/desc_order';
+    async function collection(pageType){
+      const items=[];
+      for(let page=1;page<=10;page++){
+        const result=await listings(query,{page,pageType,signal});
+        // Apex appends regional recommendations after its assigned featured listings.
+        if(pageType==='featuredproperties'){
+          items.push(...result.items.filter(item=>item.collectionOrder===1));
+          if(result.items.some(item=>item.collectionOrder!==1))return items;
+        }else items.push(...result.items);
+        if(page*20>=result.total)return items;
+      }
+      throw Error('Listings unavailable. Please try again.');
+    }
+    const [sold,current]=await Promise.all([collection('soldproperties'),collection('featuredproperties')]);
+    const candidates=[...new Map([...sold,...current].map(item=>[String(item.id).toUpperCase(),item])).values()];
+    const accepted=new Set(sold.filter(item=>item.isManual).map(item=>String(item.id).toUpperCase()));
+    let next=0;
+    await Promise.all(Array.from({length:Math.min(4,candidates.length)},async()=>{
+      while(next<candidates.length){
+        const item=candidates[next++],key=String(item.id).toUpperCase();
+        if(accepted.has(key))continue;
+        const cached=portfolioVerification.get(key);
+        const matches=cached&&cached.until>Date.now()?cached.matches:representsDaisy(await property(key,{signal}));
+        portfolioVerification.set(key,{matches,until:Date.now()+5*60*1000});
+        if(matches)accepted.add(key);
+      }
+    }));
+    if(signal?.aborted)throw new DOMException('Aborted','AbortError');
+    const items=candidates.filter(item=>accepted.has(String(item.id).toUpperCase()));
+    portfolioCache={items,until:Date.now()+60000};
+    return items;
+  }
+  const api={origin,cities,filters,resultsURL,detailURL,propertyURL,listings,normalize,request,citiesList,property,properties,photoCandidates,portfolio,representsDaisy};
   if(typeof module!=='undefined' && module.exports) module.exports=api;
   else root.DaisyIDX=api;
 })(typeof window==='undefined'?globalThis:window);

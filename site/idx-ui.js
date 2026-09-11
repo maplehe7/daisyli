@@ -8,7 +8,7 @@ async function requestIdx(query,options={}){
 }
 function idxLoading(){return '<div class="idx-loading" role="status"><span class="idx-pulse" aria-hidden="true"></span> Loading listings…</div>';}
 function idxFailure(){return `<div class="empty-state"><h2>Listings unavailable</h2><button class="button button-outline" data-idx-retry>Try again</button></div>`;}
-function idxPager(result){const pages=Math.min(10,Math.ceil(result.total/20));if(pages<=1)return '';return `<nav class="idx-pagination" aria-label="Search result pages"><button class="button button-outline" data-idx-page="${result.page-1}" ${result.page===1?'disabled':''}>Previous</button><span>Page ${result.page} of ${pages}</span><button class="button button-outline" data-idx-page="${result.page+1}" ${result.page>=pages?'disabled':''}>Next</button></nav>`;}
+function idxPager(result,maxPages=10){const pages=Math.min(maxPages,Math.ceil(result.total/20));if(pages<=1)return '';return `<nav class="idx-pagination" aria-label="Search result pages"><button class="button button-outline" data-idx-page="${result.page-1}" ${result.page===1?'disabled':''}>Previous</button><span>Page ${result.page} of ${pages}</span><button class="button button-outline" data-idx-page="${result.page+1}" ${result.page>=pages?'disabled':''}>Next</button></nav>`;}
 const idxPhotoQueue=[];
 let idxPhotoActive=0;
 function queueIdxPhoto(task){
@@ -92,6 +92,8 @@ async function runLiveSearch(form,{page=1,scroll=true}={}){
 }
 
 function bindLiveCatalogue(kind){
+  labelPortfolioLinks();
+  if(kind==='sold'){bindLivePortfolio();return;}
   const pageType=kind==='sold'?'soldproperties':'featuredproperties';
   const section=document.querySelector('.catalogue-section');
   const grid=document.getElementById('catalog-grid'), count=document.getElementById('listing-count');
@@ -116,6 +118,51 @@ function bindLiveCatalogue(kind){
   };
   ['catalog-city','catalog-sort'].forEach(id=>document.getElementById(id).addEventListener('change',()=>update()));
   update();
+}
+
+function labelPortfolioLinks(){
+  document.querySelectorAll('a[href="/sold"]').forEach(link=>{link.textContent='Portfolio';});
+}
+labelPortfolioLinks();
+
+function bindLivePortfolio(){
+  const section=document.querySelector('.catalogue-section');
+  const grid=document.getElementById('catalog-grid'),count=document.getElementById('listing-count');
+  const city=document.getElementById('catalog-city'),sort=document.getElementById('catalog-sort');
+  const heading=document.querySelector('main h1');
+  heading.textContent='Portfolio';document.title='Portfolio · Daisy Li';
+  let items=[];
+  const update=(page=1)=>{
+    const filtered=items.filter(item=>!city.value||item.city.toLowerCase()===city.value.toLowerCase())
+      .sort((a,b)=>sort.value==='price-asc'?a.price-b.price:b.price-a.price);
+    const result={items:filtered.slice((page-1)*20,page*20),total:filtered.length,page};
+    count.textContent=`${number(result.total)} ${result.total===1?'home':'homes'} · Showing ${result.total?(page-1)*20+1:0}–${(page-1)*20+result.items.length}`;
+    grid.innerHTML=result.items.length?cards(result.items):'<div class="empty-state"><h2>No matching homes</h2></div>';
+    section.querySelector('.idx-catalog-extra').innerHTML=idxPager(result,Infinity);
+    section.querySelectorAll('[data-idx-page]').forEach(button=>button.onclick=()=>{update(Number(button.dataset.idxPage));section.scrollIntoView({behavior:'smooth'});});
+    bindIdxImages(grid);applyLanguage(section);
+  };
+  const load=async()=>{
+    const controller=new AbortController();idxControllers.add(controller);
+    const timeout=setTimeout(()=>controller.abort(),45000);
+    grid.innerHTML=idxLoading();grid.setAttribute('aria-busy','true');count.textContent='';applyLanguage(grid);
+    city.disabled=sort.disabled=true;
+    try{
+      items=await DaisyIDX.portfolio({signal:controller.signal});if(!grid.isConnected||controller.signal.aborted)return;
+      // Filter the complete verified portfolio locally; adding a city to Apex's
+      // collection query can switch it to general regional search results.
+      const locations=[...new Set(items.map(item=>item.city).filter(Boolean))].sort();
+      city.replaceChildren(new Option('All locations',''),...locations.map(name=>new Option(name,name)));
+      update();
+    }catch(error){
+      controller.abort();
+      if(grid.isConnected){grid.innerHTML=idxFailure();applyLanguage(grid);grid.querySelector('[data-idx-retry]').onclick=load;}
+    }finally{
+      clearTimeout(timeout);idxControllers.delete(controller);
+      if(grid.isConnected){grid.removeAttribute('aria-busy');city.disabled=sort.disabled=false;}
+    }
+  };
+  city.addEventListener('change',()=>update());sort.addEventListener('change',()=>update());load();
 }
 
 async function loadLiveHighlights(container,city){
