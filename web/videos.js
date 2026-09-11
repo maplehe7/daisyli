@@ -252,7 +252,9 @@ window.DaisyVideos = (() => {
 /* Download each edit once. Stream from retained bytes, then loop a complete local Blob. */
 window.DaisyHeroVideo = (() => {
   const assetRoot = 'https://maplehe7.github.io/daisyli/web/assets/home-film-v4/';
-  const variants = ['film-1080-stream.mp4','film-720-stream.mp4'];
+  const variants = ['film-1080-stream.mp4','film-720-stream.mp4','film-420-stream.mp4'];
+  const qualityLabels = ['1080','720','420'];
+  const filmDuration = 30.042;
   const codec = 'video/mp4; codecs="avc1.640028"';
   let dispose;
   let ready = Promise.resolve();
@@ -276,14 +278,13 @@ window.DaisyHeroVideo = (() => {
     const connection = navigator.connection;
     const events = new AbortController();
     const on = (target,event,handler) => target.addEventListener(event,handler,{signal:events.signal});
-    const assets = variants.map((name,quality) => ({name,quality,chunks:[],bytes:0,url:null}));
+    const assets = variants.map((name,quality) => ({name,quality,chunks:[],bytes:0,total:0,rate:0,url:null}));
     const urls = new Set();
     let disposed = false, visible = true, blocked = false, started = false;
     let buffering = true, playPending = false, generation = 0, released = false, releaseReady;
-    let candidate = null, promoting = false, promotionController;
+    let candidate = null, promoting = false, promotionController, promotionRetry, startingQuality = 2, rebuffers = 0;
     ready = new Promise(resolve => { releaseReady = resolve; });
     const deferredImages = [...document.querySelectorAll('[data-home-src]')];
-    const releaseTimer = setTimeout(releaseContent,12000);
     configure(video);
 
     function configure(target) {
@@ -295,7 +296,7 @@ window.DaisyHeroVideo = (() => {
     function revoke(url) { if (urls.delete(url)) URL.revokeObjectURL(url); }
     function releaseContent() {
       if (released) return;
-      released = true; clearTimeout(releaseTimer);
+      released = true;
       if (!disposed) deferredImages.forEach(image => {
         if (!image.isConnected) return;
         image.src = image.dataset.homeSrc; image.removeAttribute('data-home-src');
@@ -344,18 +345,31 @@ window.DaisyHeroVideo = (() => {
     }
     async function promote() {
       if (!candidate || candidate.readyState < 2 || promoting || disposed || disabled() || !visible || document.hidden) return;
+      clearTimeout(promotionRetry); promotionRetry = null;
       promoting = true;
       const previous = video, next = candidate;
       const stage = new AbortController(); promotionController = stage;
       const cancel = () => stage.abort(); events.signal.addEventListener('abort',cancel,{once:true});
-      previous.pause(); generation++; playPending = false;
+      generation++; playPending = false;
       try {
-        const position = (previous.currentTime || 0) % next.duration;
-        await mediaStep(next,'seeked',() => { next.currentTime = position; },
-          () => !next.seeking && Math.abs(next.currentTime-position) < .05,stage.signal);
-        next.playbackRate = previous.playbackRate;
-        await Promise.all([next.play(),paintedFrame(next,stage.signal)]);
+        // Keep the visible video moving while the hidden HD decoder catches up.
+        // Compensate for the measured seek delay instead of freezing the old frame.
+        let lead = 0, aligned = false;
+        for (let attempt=0; attempt<3; attempt++) {
+          const position = ((previous.currentTime || 0)+lead) % next.duration;
+          const began = performance.now();
+          await mediaStep(next,'seeked',() => { next.currentTime = position; },
+            () => !next.seeking && Math.abs(next.currentTime-position) < .05,stage.signal);
+          next.playbackRate = previous.playbackRate;
+          await Promise.all([next.play(),paintedFrame(next,stage.signal)]);
+          let drift = Math.abs(next.currentTime-previous.currentTime);
+          drift = Math.min(drift,Math.abs(next.duration-drift));
+          if (drift <= .08 || previous.paused) { aligned = true; break; }
+          lead = Math.min(.5,(performance.now()-began)/1000);
+          next.pause();
+        }
         if (stage.signal.aborted || disposed || disabled() || !visible || document.hidden) return;
+        if (!aligned) { promotionRetry = setTimeout(promote,250); return; }
         video = next; candidate = null; buffering = false;
         bindMedia(video); video.style.transition = 'none'; video.classList.add('is-playing');
         removeVideo(previous);
@@ -363,15 +377,18 @@ window.DaisyHeroVideo = (() => {
         if (!stage.signal.aborted && candidate === next) { candidate = null; removeVideo(next); }
       } finally {
         events.signal.removeEventListener('abort',cancel); promoting = false; promotionController = null;
-        if (video === previous) { next.pause(); if (!disposed) resume(); }
+        if (video === previous) next.pause();
       }
     }
-    async function useBlob(asset) {
+    async function useBlob(asset,force=false) {
       if (disposed || disabled()) return;
+      // A complete MediaSource already has every frame for looping. Avoid a
+      // redundant source change just to play the same quality from another URL.
+      if (!force && video.dataset.complete === 'true' && video.dataset.quality === qualityLabels[asset.quality]) { resume(); return; }
       if (candidate) { promotionController?.abort(); removeVideo(candidate); candidate = null; }
       const next = document.createElement('video'); configure(next);
-      next.className = 'hero-film-video'; next.dataset.quality = asset.quality === 0 ? '1080' : '720';
-      next.dataset.complete = 'true'; next.setAttribute('aria-hidden','true');
+      next.className = 'hero-film-video'; next.dataset.quality = qualityLabels[asset.quality];
+      next.dataset.complete = 'true'; next.dataset.storage = 'file'; next.setAttribute('aria-hidden','true');
       candidate = next; next.src = asset.url; video.parentElement.append(next);
       try {
         await mediaStep(next,'loadeddata',() => next.load(),() => next.readyState >= 2);
@@ -394,9 +411,15 @@ window.DaisyHeroVideo = (() => {
       if (video.buffered.length && video.currentTime < video.buffered.start(0) && video.buffered.start(0) < .2) {
         video.currentTime = video.buffered.start(0); return;
       }
-      const ahead = bufferAhead(), remaining = video.duration-video.currentTime;
+      const duration = Number.isFinite(video.duration) && video.duration > 0 ? video.duration : filmDuration;
+      const ahead = bufferAhead(), remaining = duration-video.currentTime;
       const complete = video.dataset.complete === 'true' || (ahead > 0 && remaining > 0 && ahead >= remaining-.1);
-      if (buffering && ahead < 3 && !complete) return;
+      const asset = assets[qualityLabels.indexOf(video.dataset.quality)];
+      const secondsToFinish = asset?.rate > 0 && asset.total > 0 ? (asset.total-asset.bytes)/(asset.rate*.7) : Infinity;
+      // Reserve 30% of measured throughput for variation and require the rest of
+      // the file to arrive before playback catches it. Rebuffering builds a larger
+      // reserve instead of repeatedly playing three seconds and stopping again.
+      if (buffering && !complete && (ahead < (rebuffers ? 8 : 5) || secondsToFinish > Math.max(0,remaining-5))) return;
       buffering = false;
       if (!video.paused) return;
       const request = generation; playPending = true;
@@ -413,8 +436,15 @@ window.DaisyHeroVideo = (() => {
       // Decoder/loop waits are not evidence of a slow connection. Never replace
       // a downloaded source, or start a lower-quality request, because of waiting.
       mediaOn('waiting',() => {
+        if (video.dataset.complete === 'true' && video.dataset.storage === 'stream' && !video.seeking &&
+            (video.buffered.length !== 1 || video.buffered.start(0) > .2 || video.buffered.end(0) < filmDuration-.2)) {
+          // ManagedMediaSource may discard old frames under memory pressure.
+          // Recover from our retained file, without asking the network again.
+          const asset = assets[qualityLabels.indexOf(video.dataset.quality)];
+          if (asset?.url && !candidate) useBlob(asset,true);
+        }
         if (video.dataset.complete !== 'true' && !video.seeking && bufferAhead() < .2 && !promoting) {
-          buffering = true; generation++; playPending = false; video.pause();
+          buffering = true; rebuffers++; generation++; playPending = false; video.pause();
         }
       });
       for (const event of ['progress','canplay','canplaythrough','seeked']) mediaOn(event,resume);
@@ -424,7 +454,7 @@ window.DaisyHeroVideo = (() => {
       const Source = [window.MediaSource,window.ManagedMediaSource].find(Type => Type?.isTypeSupported?.(codec));
       if (!Source) return null; // Older browsers play the completed Blob instead.
       const media = new Source(), target = video;
-      target.dataset.quality = asset.quality === 0 ? '1080' : '720';
+      target.dataset.quality = qualityLabels[asset.quality]; target.dataset.storage = 'stream';
       const url = localURL(media);
       try {
         await mediaStep(media,'sourceopen',() => { target.src = url; target.load(); },() => media.readyState === 'open');
@@ -435,7 +465,12 @@ window.DaisyHeroVideo = (() => {
             await mediaStep(buffer,'updateend',() => buffer.appendBuffer(chunk),() => !buffer.updating);
             resume();
           },
-          finish() { if (media.readyState === 'open' && !buffer.updating) media.endOfStream(); }
+          finish() {
+            if (media.readyState === 'open' && !buffer.updating) media.endOfStream();
+            if (target.buffered.length === 1 && target.buffered.start(0) <= .2 && target.buffered.end(0) >= filmDuration-.2) {
+              target.dataset.complete = 'true'; resume();
+            }
+          }
         };
       } catch { return null; }
     }
@@ -445,7 +480,10 @@ window.DaisyHeroVideo = (() => {
       const cancel = () => transfer.abort(); events.signal.addEventListener('abort',cancel,{once:true});
       let timer, slower = false, decided = !probe, stream = null, appended = 0;
       const began = performance.now();
-      if (probe) timer = setTimeout(() => { if (!decided) { slower = true; transfer.abort(); } },1800);
+      const samples = [{at:began,bytes:asset.bytes}];
+      if (probe) timer = setTimeout(() => {
+        if (!decided) { startingQuality = asset.bytes*8/1800/1000 >= 1.2 ? 1 : 2; slower = true; transfer.abort(); }
+      },1800);
       try {
         const offset = asset.bytes;
         const response = await fetch(assetRoot+asset.name,{
@@ -455,6 +493,7 @@ window.DaisyHeroVideo = (() => {
         if (!response.ok) throw new Error('Video download failed');
         // If a host ignores Range, treat its full response as a fresh file.
         if (offset && response.status !== 206) { asset.chunks = []; asset.bytes = 0; }
+        asset.total = asset.bytes+Number(response.headers?.get('Content-Length') || 0);
         const reader = response.body?.getReader();
         if (!reader) {
           clearTimeout(timer); const data = new Uint8Array(await response.arrayBuffer());
@@ -464,11 +503,18 @@ window.DaisyHeroVideo = (() => {
             const {done,value} = await reader.read();
             if (done) break;
             asset.chunks.push(value); asset.bytes += value.byteLength;
+            const now = performance.now();
+            samples.push({at:now,bytes:asset.bytes});
+            while (samples.length > 2 && now-samples[1].at > 6000) samples.shift();
+            const first = samples[0];
+            asset.rate = (asset.bytes-first.bytes)/Math.max(.001,(now-first.at)/1000);
             if (!decided && asset.bytes >= 192*1024) {
               decided = true; clearTimeout(timer);
               // Measure real delivery, including latency. Screen size and stale
               // navigator.connection estimates must not force a fast phone to 720p.
-              if (asset.bytes*8/Math.max(1,performance.now()-began)/1000 < 4) {
+              const mbps = asset.bytes*8/Math.max(1,now-began)/1000;
+              if (mbps < 4) {
+                startingQuality = mbps >= 1.2 ? 1 : 2;
                 slower = true; transfer.abort(); return false;
               }
             }
@@ -502,21 +548,28 @@ window.DaisyHeroVideo = (() => {
         // Probe using the beginning of the actual HD download. Fast delivery keeps
         // that same request; slow delivery retains its prefix for the later upgrade.
         let high = false;
-        try { high = await download(assets[0],{progressive:true,probe:true}); }
+        const slowHint = ['slow-2g','2g'].includes(connection?.effectiveType) ||
+          (connection?.effectiveType === '3g' && connection.downlink > 0 && connection.downlink < 1.2);
+        try { if (!slowHint) high = await download(assets[0],{progressive:true,probe:true}); }
         catch(error) { if (disposed) return; }
         if (disposed || disabled()) return;
         if (high) { releaseContent(); await useBlob(assets[0]); return; }
-        if (!await download(assets[1],{progressive:true}) || disposed) return;
-        releaseContent(); await useBlob(assets[1]);
+        const initial = assets[startingQuality];
+        if (!await download(initial,{progressive:true}) || disposed) return;
+        releaseContent(); await useBlob(initial);
         if (disposed || disabled()) return;
-        // The complete low-quality file now loops locally while HD finishes.
-        if (await download(assets[0])) await useBlob(assets[0]);
+        // Step up once each sharper file is complete. Slow 3G reaches clear 720p
+        // sooner instead of remaining at 420p throughout the larger HD download.
+        for (let quality=startingQuality-1; quality>=0; quality--) {
+          if (disposed || disabled()) return;
+          if (await download(assets[quality])) await useBlob(assets[quality]);
+        }
       } catch { releaseContent(); } // Keep a working low-quality loop or the poster.
       finally { if (!disposed && disabled()) started = false; }
     }
     function sync() {
       if (disabled() || document.hidden || !visible) {
-        promotionController?.abort(); candidate?.pause();
+        clearTimeout(promotionRetry); promotionController?.abort(); candidate?.pause();
         generation++; playPending = false; video.pause();
         if (disabled()) video.classList.remove('is-playing');
         releaseContent();
@@ -524,11 +577,14 @@ window.DaisyHeroVideo = (() => {
     }
     bindMedia(video);
     on(document,'visibilitychange',sync); on(motion,'change',sync);
+    // Load the lower page when the visitor asks to see it. A timer must not start
+    // competing image/listing requests in the middle of a Slow 3G video download.
+    on(document,'scroll',() => { if (window.scrollY > 40) releaseContent(); });
     if (connection) on(connection,'change',sync);
     const viewport = new IntersectionObserver(entries => { visible = entries[0].isIntersecting; sync(); },{threshold:.01});
     viewport.observe(intro);
     dispose = () => {
-      disposed = true; generation++; events.abort(); viewport.disconnect(); releaseContent();
+      disposed = true; generation++; clearTimeout(promotionRetry); events.abort(); viewport.disconnect(); releaseContent();
       if (candidate) removeVideo(candidate);
       video.pause(); video.removeAttribute('src'); video.load();
       for (const url of [...urls]) revoke(url);

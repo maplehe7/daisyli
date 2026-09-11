@@ -5,7 +5,7 @@ const vm = require('node:vm');
 const tick = () => new Promise(setImmediate);
 const bytes = n => new Uint8Array(n);
 const prefix = 192*1024;
-function fixture(file,{streaming=true,managed=false,streamError=false,decodeError=false,reduced=false,saveData=false,startOffset=0}={}) {
+function fixture(file,{streaming=true,managed=false,streamError=false,decodeError=false,reduced=false,saveData=false,startOffset=0,effectiveType='4g'}={}) {
   const requests=[],created=[],revoked=[],objects=new Map(),timers=new Map();
   let now=0,timerId=0,urlId=0,observer;
   const parent={append(v){v.parentElement=parent;created.push(v);}};
@@ -14,14 +14,14 @@ function fixture(file,{streaming=true,managed=false,streamError=false,decodeErro
     Object.defineProperty(v,'currentTime',{get:()=>time,set(t){time=t;queueMicrotask(()=>v.dispatchEvent(new Event('seeked')));}});
     Object.defineProperty(v,'className',{set(value){value.split(' ').forEach(name=>classes.add(name));}});
     Object.assign(v,{src:'',dataset:{},style:{},paused:true,seeking:false,readyState:0,duration:30,end:0,playbackRate:1,
-      parentElement:parent,classes,plays:0,loads:[],buffered:{length:1,start:()=>startOffset,end:()=>v.end},
+      parentElement:parent,classes,plays:0,loads:[],pauses:[],buffered:{length:1,start:()=>startOffset,end:()=>v.end},
       classList:{add:x=>classes.add(x),remove:x=>classes.delete(x)},
       load(){v.loads.push(v.src);v.paused=true;const object=objects.get(v.src);
         if(object instanceof FakeSource){object.target=v;object.readyState='open';queueMicrotask(()=>object.dispatchEvent(new Event('sourceopen')));}
         else if(object instanceof Blob){v.end=30;v.readyState=4;queueMicrotask(()=>v.dispatchEvent(new Event('loadeddata')));}
       },
       play(){if(decodeError&&v.dataset.complete)return Promise.reject(new Error('decode'));v.paused=false;v.plays++;v.dispatchEvent(new Event('playing'));return Promise.resolve();},
-      pause(){v.paused=true;},remove(){v.removed=true;},removeAttribute(name){if(name==='src')v.src='';},setAttribute(){},
+      pause(){v.pauses.push({replacementVisible:created.some(next=>next!==v&&!next.removed&&next.classes.has('is-playing'))});v.paused=true;},remove(){v.removed=true;},removeAttribute(name){if(name==='src')v.src='';},setAttribute(){},
       requestVideoFrameCallback(callback){queueMicrotask(callback);return 1;},cancelVideoFrameCallback(){}});
     return v;
   }
@@ -29,15 +29,15 @@ function fixture(file,{streaming=true,managed=false,streamError=false,decodeErro
     static isTypeSupported(){return true;}
     addSourceBuffer(){const buffer=new EventTarget();buffer.updating=false;
       buffer.appendBuffer=chunk=>{if(streamError)throw Error('unsupported append');buffer.updating=true;
-        this.target.end=Math.min(30,this.target.end+chunk.length/prefix*4);this.target.readyState=4;
+        this.target.end=Math.min(30,this.target.end+chunk.length/prefix*6);this.target.readyState=4;
         queueMicrotask(()=>{buffer.updating=false;buffer.dispatchEvent(new Event('updateend'));});};return buffer;}
-    endOfStream(){this.readyState='ended';}
+    endOfStream(){this.readyState='ended';this.target.end=30;}
   }
   const video=makeVideo(),intro={querySelector:()=>video};
   const image={isConnected:true,dataset:{homeSrc:'/below-fold.jpg'},removeAttribute(){delete this.dataset.homeSrc;}};
   const document=Object.assign(new EventTarget(),{hidden:false,createElement:makeVideo,querySelector:s=>s==='.home-intro'?intro:video,querySelectorAll:()=>[image]});
   const motion=Object.assign(new EventTarget(),{matches:reduced});
-  const connection=Object.assign(new EventTarget(),{saveData,downlink:.1}); // Stale estimates must not force lower quality.
+  const connection=Object.assign(new EventTarget(),{saveData,downlink:.1,effectiveType}); // A stale estimate alone must not force lower quality.
   const context={window:streaming?{[managed?'ManagedMediaSource':'MediaSource']:FakeSource}:{},document,navigator:{connection},
     Blob,Uint8Array,AbortController,DOMException,performance:{now:()=>now},
     URL:{createObjectURL(object){const url='blob:retained-'+(++urlId);objects.set(url,object);return url;},revokeObjectURL(url){revoked.push(url);objects.delete(url);}},
@@ -46,7 +46,7 @@ function fixture(file,{streaming=true,managed=false,streamError=false,decodeErro
       function flush(){if(!pending)return;if(failure){pending.reject(failure);pending=null;}else if(queue.length){pending.resolve({value:queue.shift(),done:false});pending=null;}else if(ended){pending.resolve({done:true});pending=null;}}
       options.signal.addEventListener('abort',()=>{failure=new DOMException('cancel','AbortError');flush();},{once:true});
       requests.push(request);
-      return Promise.resolve({ok:true,status:options.headers?206:200,body:{getReader:()=>({read:()=>new Promise((resolve,reject)=>{pending={resolve,reject};flush();})})}});
+      return Promise.resolve({ok:true,status:options.headers?206:200,headers:{get:()=>String(prefix*5)},body:{getReader:()=>({read:()=>new Promise((resolve,reject)=>{pending={resolve,reject};flush();})})}});
     },
     matchMedia:()=>motion,IntersectionObserver:class{constructor(callback){observer=callback;}observe(){}disconnect(){}},
     setTimeout(fn,ms){timers.set(++timerId,{fn,ms});return timerId;},clearTimeout(id){timers.delete(id);}};
@@ -54,6 +54,7 @@ function fixture(file,{streaming=true,managed=false,streamError=false,decodeErro
   const hero=context.window.DaisyHeroVideo;hero.bind();
   return {hero,video,image,requests,created,revoked,objects,timers,document,motion,connection,
     time(value){now=value;},visible(value){observer([{isIntersecting:value}]);},
+    scroll(value){context.window.scrollY=value;document.dispatchEvent(new Event('scroll'));},
     active(){return created.findLast(v=>!v.removed&&v.classes.has('is-playing'))||video;},
     async feed(request,size){request.feed(bytes(size));await tick();},
     async end(request){request.end();await tick();},
@@ -73,7 +74,7 @@ async function checks(file) {
   assert.equal(fast.image.src,undefined);
   fast.video.currentTime=8.5;await fast.end(fast.requests[0]);
   const hd=fast.active();assert.equal(hd.dataset.complete,'true');assert.equal(hd.currentTime,8.5);
-  assert.equal(hd.style.transition,'none');assert.equal(fast.video.removed,true);assert.equal(fast.image.src,'/below-fold.jpg');
+  assert.equal(hd,fast.video);assert.equal(fast.created.length,0);assert.equal(fast.image.src,'/below-fold.jpg');
   const src=hd.src,loads=hd.loads.length;
   for(let i=0;i<5;i++){fast.loop(hd);await tick();}
   assert.equal(fast.requests.length,1);assert.equal(hd.src,src);assert.equal(hd.loads.length,loads);assert.equal(hd.paused,false);
@@ -98,14 +99,46 @@ async function checks(file) {
   assert.equal(slow.objects.get(upgraded.src).size,2*prefix); // Retained prefix + Range remainder, no duplicate bytes.
   assert.equal(low.removed,true);for(let i=0;i<4;i++){slow.loop(upgraded);await tick();}
   assert.equal(slow.requests.length,3);assert.ok(slow.requests.every(r=>!r.url.includes('480')));
+  assert.equal(low.pauses.length,1);assert.equal(low.pauses[0].replacementVisible,true); // Never freeze the visible film to prepare HD.
+
+  const threeG=fixture(file,{effectiveType:'2g'});
+  assert.equal(threeG.requests.length,1);assert.match(threeG.requests[0].url,/420-stream/); // Skip HD probing on a known slow connection.
+  threeG.time(5000);await threeG.feed(threeG.requests[0],prefix);
+  assert.equal(threeG.video.paused,true); // Six buffered seconds are unsafe if the rest cannot arrive in time.
+  threeG.time(10000);await threeG.feed(threeG.requests[0],prefix);
+  assert.equal(threeG.video.paused,false);assert.equal(threeG.video.dataset.quality,'420');
+  assert.equal(threeG.image.src,undefined);assert.ok(![...threeG.timers.values()].some(t=>t.ms===12000));
+  threeG.video.currentTime=6;await threeG.end(threeG.requests[0]);
+  assert.equal(threeG.active(),threeG.video);assert.equal(threeG.video.pauses.length,0); // Completing the same quality does not change sources.
+  assert.equal(threeG.requests.length,2);assert.match(threeG.requests[1].url,/720-stream/);
+  const cachedSource=threeG.video.src;for(let i=0;i<3;i++){threeG.loop(threeG.video);await tick();}
+  assert.equal(threeG.video.src,cachedSource);assert.equal(threeG.requests.length,2);
+  threeG.video.currentTime=12;threeG.video.end=12;threeG.video.dispatchEvent(new Event('waiting'));await tick();
+  assert.equal(threeG.active().dataset.storage,'file');assert.equal(threeG.active().currentTime,12);
+  assert.equal(threeG.requests.length,2); // A browser eviction uses the retained file, not another request.
+  await threeG.feed(threeG.requests[1],prefix);await threeG.end(threeG.requests[1]);
+  assert.equal(threeG.active().dataset.quality,'720');assert.equal(threeG.active().currentTime,12);
+  assert.equal(threeG.requests.length,3);assert.match(threeG.requests[2].url,/1080-stream/);
+  await threeG.feed(threeG.requests[2],prefix);await threeG.end(threeG.requests[2]);
+  assert.equal(threeG.active().dataset.quality,'1080');assert.equal(threeG.active().currentTime,12);
+
+  const glacial=fixture(file,{effectiveType:'slow-2g'});
+  for(let step=1;step<=3;step++) {glacial.time(step*15000);await glacial.feed(glacial.requests[0],prefix);assert.equal(glacial.video.plays,0);}
+  glacial.time(60000);await glacial.feed(glacial.requests[0],prefix);
+  assert.equal(glacial.video.paused,false); // A connection below the encode bitrate waits for a safe reserve.
+
+  const visitor=fixture(file);visitor.scroll(0);assert.equal(visitor.image.src,undefined);
+  visitor.scroll(50);assert.equal(visitor.image.src,'/below-fold.jpg');
 
   for(const options of [{streaming:false},{managed:true},{streamError:true}]) {
     const fallback=fixture(file,options);fallback.time(100);await fallback.feed(fallback.requests[0],prefix);
     await fallback.end(fallback.requests[0]);assert.equal(fallback.active().dataset.complete,'true');assert.equal(fallback.active().paused,false);
     assert.equal(fallback.active().disableRemotePlayback,true);assert.equal(fallback.requests.length,1);
   }
-  const decode=fixture(file,{decodeError:true});decode.time(100);await decode.feed(decode.requests[0],prefix);decode.video.currentTime=11;
-  await decode.end(decode.requests[0]);assert.equal(decode.video.paused,false);assert.equal(decode.video.currentTime,11);assert.equal(decode.requests.length,1);
+  const decode=await slowStart(file,{decodeError:true});await decode.end(decode.requests[1]);decode.video.currentTime=11;
+  await decode.feed(decode.requests[2],prefix);await decode.end(decode.requests[2]);
+  assert.equal(decode.video.paused,false);assert.equal(decode.video.currentTime,11);assert.equal(decode.requests.length,3);
+  assert.equal(decode.video.pauses.length,0);
 
   const failed=await slowStart(file);await failed.end(failed.requests[1]);const retained=failed.active();failed.requests[2].fail();await tick();
   assert.equal(failed.active(),retained);assert.equal(retained.paused,false);failed.loop(retained);await tick();assert.equal(failed.requests.length,3);
@@ -114,9 +147,9 @@ async function checks(file) {
   assert.equal(hidden.active().paused,true);hidden.document.hidden=false;hidden.document.dispatchEvent(new Event('visibilitychange'));await tick();
   assert.equal(hidden.active().dataset.quality,'1080');assert.equal(hidden.active().currentTime,29.9);assert.equal(hidden.active().paused,false);
   for(const option of [{saveData:true},{reduced:true}]) {const f=fixture(file,option);assert.equal(f.requests.length,0);await f.hero.afterBuffered(()=>{});assert.equal(f.image.src,'/below-fold.jpg');}
-  const timed=fixture(file);for(const timer of [...timed.timers.values()])if(timer.ms===1800)timer.fn();await tick();assert.match(timed.requests[1].url,/720-stream/);
+  const timed=fixture(file);for(const timer of [...timed.timers.values()])if(timer.ms===1800)timer.fn();await tick();assert.match(timed.requests[1].url,/420-stream/);
   const abandoned=fixture(file);const pending=abandoned.requests[0];abandoned.hero.bind();assert.equal(pending.options.signal.aborted,true);await tick();assert.equal(abandoned.created.length,0);
   assert.equal(fast.hero.deferImages('<img src="hero.jpg" fetchpriority="high"><img src="card.jpg">'),'<img src="hero.jpg" fetchpriority="high"><img data-home-src="card.jpg">');
-  console.log(file+': measured quality, retained loops, Range continuation, exact HD handoff, stream/Blob fallbacks, visibility and cleanup passed');
+  console.log(file+': Slow 3G selection, throughput-aware buffering, no-pause HD handoff, retained loops, browser eviction, failures and visibility passed');
 }
 (async()=>{for(const file of ['site/videos.js','web/videos.js'])await checks(file);})().catch(error=>{console.error(error);process.exitCode=1;});

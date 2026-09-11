@@ -32,5 +32,13 @@ for (const variant of variants) {
     console.log(streamName, fs.statSync(path.join(folder,streamName)).size);
   }
 }
+// A 420p first pass stays below Slow 3G's sustained bandwidth with headroom.
+// Short, fixed keyframe intervals keep the startup buffer predictable.
+run(['-i',source,'-an','-vf','scale=746:420:flags=lanczos,setsar=1,fps=24',
+  '-c:v','libx264','-preset','slow','-crf','26','-maxrate','260k','-bufsize','260k',
+  '-threads','4','-pix_fmt','yuv420p','-profile:v','high','-level:v','4.0',
+  '-g','24','-keyint_min','24','-sc_threshold','0',
+  '-movflags','+frag_keyframe+empty_moov+default_base_moof',path.join(folder,'film-420-stream.mp4')]);
+console.log('film-420-stream.mp4', fs.statSync(path.join(folder,'film-420-stream.mp4')).size);
 run(['-i',path.join(folder,'poster.jpg'),'-vf','scale=1280:-2','-frames:v','1','-q:v','6',path.join(folder,'poster-lite.jpg')]);
 console.log('poster-lite.jpg', fs.statSync(path.join(folder,'poster-lite.jpg')).size);
