@@ -29,6 +29,7 @@
 .weixin-qr-close{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:44px;padding:6px 12px;border:1px solid #b9c7bf;border-radius:6px;background:#f4f7f5;font-size:14px}
 .weixin-qr-close>span:first-child{font-size:26px;line-height:1}
 .weixin-qr-account{text-align:center;margin-top:12px;font-size:16px;font-weight:600;overflow-wrap:anywhere}
+.original-contact .contact-original-photo img{width:100%;height:auto;aspect-ratio:1;border-radius:50%;object-fit:cover}
 @media(min-width:901px){
   .original-contact .contact-original-photo{width:min(100%,360px);justify-self:center;align-self:start}
 }
@@ -48,7 +49,6 @@
   .original-contact .contact-copy h1{grid-column:1;grid-row:1;margin:0;align-self:end;font-size:clamp(30px,8.5vw,38px);line-height:1.15;letter-spacing:-1px}
   .original-contact .contact-license{grid-column:1;grid-row:2;margin:8px 0 0;font-size:11px}
   .original-contact .contact-original-photo{grid-column:2;grid-row:1 / 3;align-self:center;width:100%;max-width:none;margin:0}
-  .original-contact .contact-original-photo img{width:100%;height:auto;border-radius:6px}
   .original-contact .contact-detail{grid-column:1 / -1;min-width:0;margin-top:0;padding-block:14px 10px;border-bottom:1px solid #e2e8e3}
   .original-contact .contact-detail:first-of-type{padding-top:24px}
   .original-contact .contact-detail>span{font-size:11px;line-height:1.5;margin-bottom:2px}
