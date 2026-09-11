@@ -156,3 +156,7 @@ html[lang=zh-Hans] .about-hero p,html[lang=zh-Hans] .community-story p{line-heig
 @media(max-width:360px){
   .site-header .language-switch{font-size:12px}
 }
+@media(max-width:767px){
+  .catalogue-section .listing-toolbar,
+  .catalogue-section .toolbar-filters>.text-link{border-bottom:0}
+}
