@@ -117,12 +117,12 @@ html[lang=zh-Hans] .about-hero p,html[lang=zh-Hans] .community-story p{line-heig
 @media(max-width:360px){.search-strip .quick-search{grid-template-columns:1fr;gap:10px}.quick-search .field:nth-child(2){padding:0 0 9px!important;border-right:0!important;border-bottom:1px solid var(--line)!important}.quick-search .field:nth-child(3){padding:0!important}.quick-search select{font-size:15px}}
 
 /* White navigation, including the expanded mobile menu. */
-.site-header{background:#fff;color:var(--ink);border-color:var(--line);backdrop-filter:none}
+.site-header{background:#fff;color:#000;border-color:var(--line);backdrop-filter:none}
 .site-header #main-nav{background:#fff;border-color:var(--line)}
 .site-header #main-nav>a:not(.nav-contact)::after{background:var(--ink)}
 .site-header #main-nav .nav-contact{border-color:#a8b6ad}
 .site-header #main-nav .nav-contact:hover{background:var(--soft)}
-.site-header .language-switch,.site-header .language-switch button{color:var(--ink)}
+.site-header .language-switch,.site-header .language-switch button{color:#000}
 .site-header .language-switch button[aria-pressed=true],.site-header .language-switch button:hover{color:#000}
 .site-header .menu-toggle{color:var(--ink)}
 .site-header .menu-toggle span{background:var(--ink)}
