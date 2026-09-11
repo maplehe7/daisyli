@@ -13,6 +13,7 @@ const originalTextNodes=new WeakMap();
 const originalAttributes=new WeakMap();
 const chineseUI={
   'Portfolio':'房产案例','San Diego':'圣迭戈','Rancho Santa Margarita':'兰乔圣玛格丽塔',
+  'Broker':'房地产经纪人','Orange County Real Estate':'橙县房地产','Search':'搜索','Search by Address, City, or Neighborhood':'按地址、城市或社区搜索','Address, City, or Neighborhood':'地址、城市或社区',
   'Text Me':'发短信联系我','Message on Weixin':'微信联系','Weixin QR code':'微信二维码',"Daisy Li's Weixin QR code":'Daisy Li 的微信二维码','Weixin ID':'微信号','Copy':'复制',
   'Tap to enlarge':'点击放大','Enlarge Weixin QR code':'放大微信二维码','Close QR code':'关闭二维码','Close':'关闭',
   'Skip to content':'跳至内容','DESIGN PREVIEW':'设计预览','Your live site is unchanged.':'正式网站尚未更改。',
@@ -117,7 +118,7 @@ function applyLanguage(container=document.body){
   }
   document.documentElement.lang=siteLanguage==='zh'?'zh-Hans':'en';
   document.querySelectorAll('[data-site-language]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.siteLanguage===siteLanguage)));
-  const heading=document.querySelector('main h1');if(heading)document.title=heading.textContent+' · Daisy Li';
+  const heading=document.querySelector('main h1');if(heading)document.title=(heading.id==='home-title'?(siteLanguage==='zh'?'橙县房地产':'Orange County Real Estate'):heading.textContent)+' · Daisy Li';
 }
 function rememberLanguageURL(href){const url=new URL(href,location.origin);if(siteLanguage==='zh')url.searchParams.set('lang','zh');else url.searchParams.delete('lang');return url.pathname+url.search+url.hash;}
 function setSiteLanguage(language){

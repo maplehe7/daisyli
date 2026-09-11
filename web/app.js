@@ -37,8 +37,8 @@ function input(name,label,placeholder='',type='text',className=''){return `<labe
 function checkbox(name,label,value='yes',checked=false){return `<label class="check"><input name="${name}" type="checkbox" value="${value}" ${checked?'checked':''}><span>${label}</span></label>`;}
 function cityOptions(){return [['','All four communities'],...places.map(p=>[p.name,p.name])];}
 function priceOptions(){return [['','Any price'],...[500000,750000,1000000,1500000,2000000,2500000,3000000,4000000,5000000,7500000,10000000,20000000].map(n=>[n,money(n)])];}
-function quickSearch(){return `<form id="quick-search" class="quick-search">${select('city','Location',cityOptions())}${select('max','Price range',[['','Any price'],[1500000,'Up to $1.5M'],[2500000,'Up to $2.5M'],[5000000,'Up to $5M'],[10000000,'Up to $10M']])}${select('beds','Bedrooms',[['','Any bedrooms'],[2,'2+ bedrooms'],[3,'3+ bedrooms'],[4,'4+ bedrooms'],[5,'5+ bedrooms']])}<button class="button" type="submit">Find a home ${arrow}</button></form>`;}
-function home(){return `<div class="home-intro"><div class="hero-photo"><img src="https://maplehe7.github.io/daisyli/web/assets/property-${heroId}.jpg" alt="2 Havenhurst Drive, a Spanish-style estate in Coto de Caza" fetchpriority="high" width="1024" height="683"></div><section class="home-hero wrap"><div class="hero-copy"><a class="text-link" href="/about">About Daisy ${arrow}</a></div></section><div class="wrap search-strip">${quickSearch()}<a href="/property/${heroId}" class="hero-photo-caption"><span>2 Havenhurst Drive <small>Coto de Caza</small></span>${diagonal}</a></div></div>
+function quickSearch(){return `<form id="quick-search" class="home-search" role="search" action="/search"><label class="home-search-field" for="home-location"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="7.5"/><path d="m16 16 5 5"/></svg><input id="home-location" name="keyword" type="search" list="home-city-list" aria-label="Search by Address, City, or Neighborhood" placeholder="Address, City, or Neighborhood" autocomplete="off"><datalist id="home-city-list">${places.map(place=>`<option value="${escapeHTML(place.name)}"></option>`).join('')}</datalist></label><button class="button home-search-button" type="submit">Search</button></form>`;}
+function home(){return `<div class="home-intro"><div class="hero-photo"><img src="https://maplehe7.github.io/daisyli/web/assets/home-film-v1/poster.jpg" alt="" fetchpriority="high" width="1920" height="1080"></div><section class="home-hero wrap" aria-labelledby="home-title"><div class="hero-copy"><h1 id="home-title">Daisy Li</h1><p class="home-credentials"><span>Broker</span><span aria-hidden="true"> | </span><span>DRE #01986831</span></p><p class="home-region">Orange County Real Estate</p></div>${quickSearch()}</section></div>
 <section class="section wrap"><div class="section-heading"><div><h2>Featured Properties</h2></div><a class="text-link" href="/featured">Featured Homes ${arrow}</a></div><div class="property-grid" id="home-live-listings">${idxLoading()}</div></section>
 <section class="about-intro"><div class="wrap about-grid"><div class="portrait-frame"><img src="https://maplehe7.github.io/daisyli/web/assets/daisy-portrait.jpeg" alt="Daisy Li, Orange County real estate broker" width="500" height="540" loading="lazy"></div><div class="about-copy"><h2>About Daisy</h2><p>${escapeHTML(siteLanguage==='zh'?chineseContent.homeBio:originalContent.homeBio)}</p><a class="text-link" href="/about">LEARN MORE ${arrow}</a></div></div></section>
 <section class="section wrap"><div class="section-heading"><div><h2>Neighborhoods</h2></div><a class="text-link" href="/neighborhoods">Neighborhoods ${arrow}</a></div><div class="community-grid">${places.map(communityCard).join('')}</div></section>
@@ -62,7 +62,32 @@ function toast(message){const el=document.getElementById('toast');el.textContent
 function captureSearch(form){const fd=new FormData(form);return Object.fromEntries([...new Set(fd.keys())].map(key=>[key,fd.getAll(key)]));}
 function restoreSearch(form,state){for(const el of form.elements){if(!el.name)continue;const value=Array.isArray(state[el.name])?state[el.name]:state[el.name]?[state[el.name]]:[];if(el.type==='checkbox')el.checked=value.includes(el.value);else if(el.type!=='submit'&&el.type!=='button'&&el.type!=='reset')el.value=value[0]||'';}}
 function bindPage(path){
-  document.getElementById('quick-search')?.addEventListener('submit',e=>{e.preventDefault();navigate('/search?'+new URLSearchParams(new FormData(e.target))+'&run=1');});
+  const homeSearch=document.getElementById('quick-search');
+  if(homeSearch){
+    let cityRows=places.map(place=>({name:place.name}));
+    const loadCities=()=>DaisyIDX.citiesList().then(rows=>{cityRows=rows;if(homeSearch.isConnected)homeSearch.querySelector('datalist').innerHTML=rows.map(row=>`<option value="${escapeHTML(row.name)}"></option>`).join('');}).catch(()=>{});
+    homeSearch.addEventListener('focusin',loadCities,{once:true});
+    homeSearch.addEventListener('submit',async event=>{
+      event.preventDefault();
+      const value=homeSearch.elements.keyword.value.trim(),button=homeSearch.querySelector('button');
+      button.disabled=true;
+      try{
+        const aliases={'尔湾':'Irvine','纽波特海滩':'Newport Beach','森林湖':'Lake Forest','科托德卡萨':'Coto de Caza'};
+        const locationName=aliases[value]||value;
+        // Address and ZIP searches do not need the city directory.
+        if(locationName&&!/^\d/.test(locationName))await loadCities();
+        if(!homeSearch.isConnected)return;
+        const city=cityRows.find(row=>row.name.toLowerCase()===locationName.toLowerCase());
+        const params=new URLSearchParams({run:'1'});
+        if(city)params.set('city',city.name);
+        else if(/^\d{5}(?:-\d{4})?$/.test(value))params.set('zip',value);
+        else if(/^\d+\s/.test(value))params.set('address',value);
+        else if(/^[a-z]{1,5}\d{6,}$/i.test(value))params.set('mls',value);
+        else if(value)params.set('keyword',value);
+        navigate('/search?'+params);
+      }finally{button.disabled=false;}
+    });
+  }
   if(path==='/featured'||path==='/sold')bindLiveCatalogue(path.slice(1));
   DaisySearch.bind();
   DaisyWeixin.bind();
