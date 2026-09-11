@@ -132,14 +132,12 @@ function bindLivePortfolio(){
   const heading=document.querySelector('main h1');
   heading.textContent='Portfolio';document.title='Portfolio · Daisy Li';
   let items=[];
-  const update=(page=1)=>{
+  const update=()=>{
     const filtered=items.filter(item=>!city.value||item.city.toLowerCase()===city.value.toLowerCase())
       .sort((a,b)=>sort.value==='price-asc'?a.price-b.price:b.price-a.price);
-    const result={items:filtered.slice((page-1)*20,page*20),total:filtered.length,page};
-    count.textContent=`${number(result.total)} ${result.total===1?'home':'homes'} · Showing ${result.total?(page-1)*20+1:0}–${(page-1)*20+result.items.length}`;
-    grid.innerHTML=result.items.length?cards(result.items):'<div class="empty-state"><h2>No matching homes</h2></div>';
-    section.querySelector('.idx-catalog-extra').innerHTML=idxPager(result,Infinity);
-    section.querySelectorAll('[data-idx-page]').forEach(button=>button.onclick=()=>{update(Number(button.dataset.idxPage));section.scrollIntoView({behavior:'smooth'});});
+    count.textContent=`${number(filtered.length)} ${filtered.length===1?'home':'homes'}`;
+    grid.innerHTML=filtered.length?cards(filtered):'<div class="empty-state"><h2>No matching homes</h2></div>';
+    section.querySelector('.idx-catalog-extra').innerHTML='';
     bindIdxImages(grid);applyLanguage(section);
   };
   const load=async()=>{
