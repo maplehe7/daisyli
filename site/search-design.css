@@ -1,0 +1,169 @@
+/* Readable search controls with comfortable spacing on a white page. */
+main:has(>.search-page-intro){background:#fff}
+.search-page-intro.wrap,.search-layout.wrap:has(.guided-search),.search-results.wrap{width:min(1240px,calc(100% - 128px))}
+.page-intro.search-page-intro{padding-block:34px 32px;gap:18px 32px}
+.search-page-intro h1{font-size:44px;line-height:1.1;letter-spacing:-1.4px}
+.search-page-intro .search-collections{padding:0;border:0;border-radius:0;background:none;gap:20px;font-size:17px}
+.search-page-intro .search-collections a{padding:8px 0;min-height:42px;border:0;border-bottom:1px solid #bac7b6;border-radius:0;white-space:nowrap}
+.search-page-intro .search-collections a:hover{color:#517044;border-color:#517044}
+.search-layout:has(.guided-search){grid-template-columns:minmax(0,1fr) 280px;align-items:start;gap:48px;padding-bottom:48px}
+#advanced-search.guided-search{min-width:0;padding:0;border:0;border-radius:0;background:transparent;box-shadow:none;font-size:16px}
+#advanced-search.guided-search .search-basics{padding:0 0 26px}
+.guided-search .search-primary-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:26px 24px;margin-bottom:28px}
+.guided-search .field>span,.guided-search .search-choice-group legend{color:#344b3e;font-size:16px;font-weight:550;line-height:1.4}
+.guided-search .search-primary-grid .field>span{margin-bottom:10px}
+.guided-search input:not([type=checkbox]),.guided-search select{min-height:60px;padding:14px 16px;border:1px solid #c6d0c0;border-radius:4px;background-color:#fff;color:var(--ink);font-size:19px;line-height:1.5}
+.guided-search select{padding-right:42px;background-position:right 16px center}
+.guided-search input::placeholder{color:#7c8976}
+.guided-search input:not([type=checkbox]):focus,.guided-search select:focus{border-color:#64835f;outline:2px solid #dfe9d8;outline-offset:2px}
+.guided-search .city-picker-controls{gap:12px}
+.guided-search .city-picker-controls button{min-width:80px;padding:0 20px;border:1px solid #b6c6ad;border-radius:4px;background:#fff;color:var(--ink);font-size:18px;font-weight:550}
+.guided-search .city-picker-controls button:hover{background:#f0f5ec}
+.guided-search .city-shortcuts{gap:10px;margin-top:14px}
+.guided-search .city-shortcuts button{min-height:44px;padding:9px 13px;border:1px solid #cdd8c6;border-radius:4px;background:#fff;color:#40583a;font-size:15px;line-height:1.4}
+.guided-search .city-shortcuts button:hover{background:#f0f5eb}
+.guided-search .city-shortcuts button[aria-pressed=true]{background:#294a37;border-color:#294a37;color:#fff}
+.guided-search .selected-cities{gap:10px;margin-top:12px}
+.guided-search .selected-cities .fine-print{font-size:15px;color:#71806a}
+.guided-search .city-chip{padding:8px 12px;border-radius:4px;font-size:16px;background:#fff;border-color:#c5d3bc}
+.guided-search .city-chip button{font-size:25px;min-width:24px;min-height:24px}
+.guided-search .search-choice-group legend{margin-bottom:14px}
+.guided-search .required-mark{padding:0;margin-left:10px;border:0;border-radius:0;background:none;color:#637357;font-size:14px;font-weight:500;letter-spacing:0}
+.guided-search .property-types{gap:12px 28px}
+.guided-search .search-choice-group .check{min-height:46px;padding:8px 0;border:0;border-radius:0;background:none;gap:12px;color:#344b3e;font-size:17px;line-height:1.5}
+.guided-search .search-choice-group .check:hover,.guided-search .search-choice-group .check:has(input:checked){border:0;background:none;color:var(--ink)}
+.guided-search .search-choice-group .check:focus-within{outline:2px solid #7b947c;outline-offset:4px}
+.guided-search .search-choice-group .check input,.guided-search .advanced-details>.check input{width:21px;height:21px;accent-color:#34583a;flex-shrink:0}
+.guided-search .check-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 24px}
+.guided-search .other-property-types{margin-top:4px}
+.guided-search .other-property-types summary{min-height:44px;padding:9px 16px;border:1px solid #c6d3bd;border-radius:5px;background:#fff;color:#405d36;font-size:16px;font-weight:500;gap:14px}
+.guided-search .other-property-types summary:hover,.guided-search .other-property-types[open]>summary{background:#f0f5ea;border-color:#a4b697}
+.guided-search .property-types-toggle{width:16px;height:16px}
+.guided-search .property-types-toggle::before{width:16px;height:2px;left:0;top:7px}
+.guided-search .property-types-toggle::after{width:2px;height:16px;left:7px;top:0}
+.guided-search .other-property-options{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 24px;padding-top:14px}
+#advanced-search.guided-search .listing-status-section{padding:24px 0;border-color:#dce3d7}
+.guided-search .search-field-error{font-size:16px;line-height:1.5;margin-top:10px}
+.guided-search input[aria-invalid=true]{border-color:#a34b42}
+.guided-search .search-choice-group[aria-invalid=true] legend{color:#9b352e}
+.guided-search .search-lookup,.guided-search .advanced-details{margin:0;padding:0;border:0;border-top:1px solid #dce3d7;border-radius:0;background:none;box-shadow:none}
+.guided-search .advanced-details{border-bottom:1px solid #dce3d7}
+.guided-search .search-lookup>summary,.guided-search .advanced-details>summary{min-height:60px;padding:16px 0;font-size:18px;font-weight:500;line-height:1.5;color:#344e2e}
+.guided-search .search-lookup>summary:hover,.guided-search .advanced-details>summary:hover{background:none;color:#577d43}
+.guided-search .search-lookup .plus,.guided-search .advanced-details .plus{font-size:25px}
+.guided-search .search-lookup>p{margin:0 0 18px;padding:0;font-size:16px}
+.guided-search .search-lookup>.fields-grid,.guided-search .advanced-details>.fields-grid{grid-template-columns:repeat(2,minmax(0,1fr));margin:0;padding:4px 0 24px;gap:24px}
+.guided-search .advanced-details>.check{margin:0;padding:0 0 22px;min-height:48px;font-size:18px;gap:12px}
+.guided-search .search-actions{padding-block:26px 10px;gap:24px}
+.guided-search .search-actions>div{flex-direction:row;gap:16px}
+.guided-search .search-actions .button{min-width:0;min-height:58px;padding:14px 23px;border-radius:4px;font-size:18px;font-weight:550;box-shadow:none}
+.guided-search .button:not(.button-outline){background:#264734;border-color:#264734}
+.guided-search .button:not(.button-outline):hover{background:#365b3c}
+.guided-search .button-outline{background:#fff;border-color:#bac9b1;color:#3e5a34}
+.guided-search .reset-search{font-size:17px;color:#65795a}
+.search-layout:has(.guided-search) .search-aside{overflow:visible;border:0;border-radius:0;background:transparent;box-shadow:none}
+.search-layout:has(.guided-search) .search-aside-photo{height:188px}
+.search-layout:has(.guided-search) .search-aside-photo img{height:100%;border-radius:4px;object-fit:cover}
+.search-layout:has(.guided-search) .search-aside-copy{padding:24px 0}
+.search-layout:has(.guided-search) .search-aside-copy h2{font-size:36px;margin-bottom:20px}
+.search-layout:has(.guided-search) .search-aside-copy .text-link{font-size:17px}
+.search-layout:has(.guided-search) .search-aside-contact{margin:0;padding-block:22px;border-color:#dce3d7}
+.search-layout:has(.guided-search) .search-aside-contact img{width:60px;height:60px}
+.search-layout:has(.guided-search) .search-aside-contact strong{font-size:20px}
+.search-layout:has(.guided-search) .search-aside-contact a{font-size:16px}
+.search-results{padding-top:16px;padding-bottom:60px;background:#fff}
+.search-results .section-heading{margin-bottom:24px;align-items:center}
+.search-results .section-heading h2{font-size:42px;margin-bottom:10px}
+.search-results .section-heading p{font-size:18px}
+.search-results .section-heading .text-link{font-size:18px}
+.search-results .idx-result-links{padding:0 0 20px;margin-bottom:28px;border:0;border-bottom:1px solid #dce3d7;border-radius:0;background:none;box-shadow:none}
+.search-results .results-view-toggle{border:1px solid #c8d3c0;padding:0;border-radius:4px;background:#fff}
+.search-results .results-view-toggle button{min-height:52px;padding:10px 25px;border-radius:0;font-size:18px}
+.search-results .results-view-toggle [aria-pressed=true]{background:#294a37}
+.search-results .idx-result-links>.text-link{font-size:17px;padding-bottom:6px}
+.search-results .property-grid{gap:38px 28px}
+.search-results .property-card{min-width:0;overflow:visible;border:0;border-radius:0;background:none;box-shadow:none}
+.search-results .property-image{border-radius:5px;aspect-ratio:1.5}
+.search-results .property-image>a:focus-visible{outline:3px solid #f4fff1;outline-offset:-5px}
+.search-results .property-info{padding:20px 0 0}
+.search-results .property-price{font-size:32px;letter-spacing:-.7px;margin-bottom:12px}
+.search-results .property-info h3{font-size:20px;line-height:1.4}
+.search-results .property-city{font-size:17px;line-height:1.5;margin-bottom:16px;color:#71806a}
+.search-results .property-facts{font-size:15px;line-height:1.5;padding-top:15px;border-color:#dce3d7}
+.search-results .property-facts span+span::before{margin-inline:10px}
+.search-results .property-mls{font-size:14px;line-height:1.5;margin-bottom:0}
+.search-results .property-status{font-size:14px;padding:7px 12px;border-radius:3px}
+.search-results .favorite{width:44px;height:44px}
+.search-results .favorite svg{width:21px;height:21px}
+.search-results .idx-pagination .button,.search-results .map-actions .button{font-size:18px;min-height:56px;border-radius:4px}
+.search-results .idx-pagination>span{font-size:18px}
+.search-results .results-map-canvas{border:0;border-radius:4px}
+.search-results .empty-state{padding:30px 0;border:0;border-radius:0;background:none;box-shadow:none;font-size:18px}
+main:has(>.search-page-intro) .contact-band p{font-size:18px;line-height:1.6}
+main:has(>.search-page-intro) .contact-band .button{font-size:18px;min-height:60px}
+
+@media(max-width:1279px){
+  .search-layout:has(.guided-search){grid-template-columns:1fr}
+  .search-layout:has(.guided-search) .search-aside{display:none}
+}
+@media(max-width:1100px){
+  .page-intro.search-page-intro{align-items:flex-start;flex-direction:column;gap:12px}
+  .search-results .property-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:767px){
+  .search-page-intro.wrap,.search-layout.wrap:has(.guided-search),.search-results.wrap{width:calc(100% - 48px)}
+  .page-intro.search-page-intro{padding-block:28px 28px;gap:12px}
+  .search-page-intro h1{font-size:36px}
+  .search-page-intro .search-collections{display:flex;flex-wrap:wrap;gap:4px 18px;font-size:15px;padding:0;border:0;background:none}
+  .search-page-intro .search-collections a{min-height:38px;padding:7px 0;border:0;border-bottom:1px solid #bac7b6;border-radius:0;background:none}
+  #advanced-search.guided-search{padding:0;border:0;border-radius:0}
+  #advanced-search.guided-search .search-basics{padding-top:0}
+  .guided-search .search-primary-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:22px 16px}
+  .guided-search .field>span,.guided-search .search-choice-group legend{font-size:16px}
+  .guided-search input:not([type=checkbox]),.guided-search select{min-height:56px;padding:13px;font-size:18px}
+  .guided-search select{padding-right:36px;background-position:right 12px center}
+  .guided-search .city-picker-controls{gap:10px}
+  .guided-search .city-picker-controls button{min-width:70px;padding-inline:16px;font-size:18px}
+  .guided-search .city-shortcuts{gap:8px}
+  .guided-search .city-shortcuts button{min-height:44px;padding:10px 12px;font-size:15px}
+  .guided-search .search-choice-group .check{min-height:44px;padding:8px 0;font-size:16px}
+  .guided-search .search-choice-group .check input,.guided-search .advanced-details>.check input{width:20px;height:20px}
+  .guided-search .check-row,.guided-search .other-property-options{grid-template-columns:1fr;gap:4px}
+  .guided-search .other-property-types summary{min-height:44px;font-size:16px}
+  .guided-search .required-mark{font-size:14px}
+  .guided-search .search-lookup>summary,.guided-search .advanced-details>summary{min-height:58px;font-size:17px;line-height:1.6;padding:15px 0}
+  .guided-search .search-lookup>.fields-grid,.guided-search .advanced-details>.fields-grid{grid-template-columns:1fr;padding-inline:0;gap:22px}
+  .guided-search .search-actions{padding-block:24px 12px;gap:22px}
+  .guided-search .search-actions>div{flex-direction:row}
+  .guided-search .search-actions .button{min-height:54px;width:100%;padding:13px 18px;font-size:18px}
+  .guided-search .reset-search{align-self:center;font-size:17px}
+  .search-layout:has(.guided-search){padding-bottom:40px}
+  main:has(>.search-page-intro) .mobile-search-dock{padding:12px 24px;background:#fff;border-top:1px solid #dce3d7;box-shadow:none}
+  main:has(>.search-page-intro) .mobile-search-dock .button{min-height:54px;border-radius:4px;font-size:18px;background:#264734}
+  .search-results .section-heading{align-items:flex-start;gap:18px}
+  .search-results .section-heading h2{font-size:34px}
+  .search-results .section-heading p,.search-results .section-heading .text-link{font-size:16px}
+  .search-results .idx-result-links{gap:16px}
+  .search-results .idx-result-links>.text-link{font-size:15px}
+  .search-results .property-grid{grid-template-columns:1fr;gap:38px}
+  .search-results .property-price{font-size:30px}
+  .search-results .property-info h3{font-size:20px}
+  .search-results .property-city{font-size:17px}
+  .search-results .property-mls{font-size:13px}
+}
+@media(max-width:360px){
+  .search-page-intro.wrap,.search-layout.wrap:has(.guided-search),.search-results.wrap{width:calc(100% - 40px)}
+  .search-page-intro h1{font-size:34px}
+  .guided-search .search-primary-grid{gap:22px 12px}
+  .guided-search .field>span{font-size:16px}
+  .guided-search input:not([type=checkbox]),.guided-search select{padding-inline:12px;font-size:17px}
+  .guided-search select{padding-right:30px}
+  .guided-search .city-picker-controls button{min-width:62px;padding-inline:12px}
+  .guided-search .city-shortcuts button{font-size:14px}
+  .search-results .property-price{font-size:28px}
+  .search-results .property-facts{font-size:14px}
+  main:has(>.search-page-intro) .mobile-search-dock{padding-inline:20px}
+}
+@media(max-width:300px){
+  body:has(.search-page-intro) .site-header .brand>span{font-size:18px;letter-spacing:.8px}
+}
