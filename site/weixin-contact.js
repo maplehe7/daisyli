@@ -7,15 +7,6 @@ window.DaisyWeixin = (() => {
   const expandIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5"/></svg>';
   const linkIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M7 7h10v10"/></svg>';
 
-  function contactURL(value) {
-    if (!value) return '';
-    try {
-      const url = new URL(value);
-      const officialHost = ['wechat.com', 'weixin.qq.com'].some(host => url.hostname === host || url.hostname.endsWith('.' + host));
-      return url.protocol === 'https:' && officialHost ? url.href : '';
-    } catch { return ''; }
-  }
-
   function imageURL(value) {
     if (!value) return '';
     try {
@@ -26,11 +17,9 @@ window.DaisyWeixin = (() => {
   }
 
   function render() {
-    const url = contactURL(config.contactUrl), qr = imageURL(config.qrImage);
-    const label = '<span>Message on Weixin</span>';
-    const button = url
-      ? `<a class="button weixin-button" href="${escapeHTML(url)}" target="_blank" rel="noopener">${icon}${label}${linkIcon}</a>`
-      : `<button type="button" class="button weixin-button" disabled>${icon}${label}</button>`;
+    const qr = imageURL(config.qrImage);
+    const messageIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.4 8.4 0 0 1 3.8-.9h.5a8.5 8.5 0 0 1 8 8v.5Z"/></svg>';
+    const button = `<a class="button weixin-button" href="sms:+19498610160">${messageIcon}<span>Text Me</span>${linkIcon}</a>`;
     const qrImage = qr ? `<span class="weixin-qr-image"><img class="weixin-profile-qr" src="${escapeHTML(qr)}" alt="Daisy Li's Weixin QR code" width="888" height="1137"></span>` : '';
     const qrButton = qr ? `<button type="button" class="weixin-qr-open" data-open-weixin-qr aria-haspopup="dialog" aria-controls="weixin-qr-dialog" aria-label="Enlarge Weixin QR code">${qrImage}<span class="weixin-qr-cue">${expandIcon}<span>Tap to enlarge</span></span></button>` : '';
     const viewer = qr ? `<dialog id="weixin-qr-dialog" class="weixin-qr-dialog" aria-labelledby="weixin-qr-title"><div class="weixin-qr-viewer"><div class="weixin-qr-toolbar"><h2 id="weixin-qr-title">Weixin QR code</h2><button type="button" class="weixin-qr-close" data-close-weixin-qr aria-label="Close QR code"><span aria-hidden="true">×</span><span>Close</span></button></div>${qrImage}<div class="weixin-qr-account" data-no-translate>${escapeHTML(config.id)}</div></div></dialog>` : '';

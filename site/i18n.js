@@ -12,7 +12,7 @@ let siteLanguage=DaisyLanguage.select({
 const originalTextNodes=new WeakMap();
 const originalAttributes=new WeakMap();
 const chineseUI={
-  'Message on Weixin':'微信联系','Weixin QR code':'微信二维码',"Daisy Li's Weixin QR code":'Daisy Li 的微信二维码','Weixin ID':'微信号','Copy':'复制',
+  'Text Me':'发短信联系我','Message on Weixin':'微信联系','Weixin QR code':'微信二维码',"Daisy Li's Weixin QR code":'Daisy Li 的微信二维码','Weixin ID':'微信号','Copy':'复制',
   'Tap to enlarge':'点击放大','Enlarge Weixin QR code':'放大微信二维码','Close QR code':'关闭二维码','Close':'关闭',
   'Skip to content':'跳至内容','DESIGN PREVIEW':'设计预览','Your live site is unchanged.':'正式网站尚未更改。',
   'Daisy Li home':'Daisy Li 首页','Home Search':'房源搜索','Home search':'房源搜索','Featured Homes':'精选房源','Featured homes':'精选房源','Featured Properties':'精选房源','Sold Homes':'已售房源','Sold homes':'已售房源',
