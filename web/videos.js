@@ -248,9 +248,9 @@ window.DaisyVideos = (() => {
   return {render, bind};
 })();
 
-/* The five approved clips are already trimmed, joined, and rendered at 2x. */
+/* Selected property clips are trimmed, joined, and rendered at 2x with no audio. */
 window.DaisyHeroVideo = (() => {
-  const assetRoot = 'https://maplehe7.github.io/daisyli/web/assets/home-film-v1/';
+  const assetRoot = 'https://maplehe7.github.io/daisyli/web/assets/home-film-v2/';
   let loader, dispose;
 
   function render() {

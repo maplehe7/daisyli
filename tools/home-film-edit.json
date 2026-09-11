@@ -1,59 +1,192 @@
 {
-  "sources": [
-    {
-      "vimeoId": "1072573097",
-      "clips": [
-        [
-          9,
-          20
-        ],
-        [
-          28,
-          190
-        ]
-      ],
+  "version": "home-film-v2",
+  "speed": 2,
+  "fps": 48,
+  "audio": false,
+  "sources": {
+    "48-panorama": {
       "title": "48 Panorama",
-      "availableResolution": "1920x1080"
+      "vimeoId": "1072573097",
+      "resolution": [
+        1920,
+        1080
+      ]
     },
-    {
-      "vimeoId": "584055906",
-      "clips": [
-        21,
-        205
-      ],
-      "title": "102 Nest Pine",
-      "availableResolution": "1280x720"
-    },
-    {
-      "vimeoId": "1182450083",
-      "clips": [
-        [
-          6,
-          30
-        ],
-        [
-          39,
-          195
-        ]
-      ],
+    "8-panorama": {
       "title": "8 Panorama",
-      "availableResolution": "1920x1080"
+      "vimeoId": "1182450083",
+      "resolution": [
+        1920,
+        1080
+      ]
+    },
+    "102-nest-pine": {
+      "title": "102 Nest Pine",
+      "vimeoId": "584055906",
+      "resolution": [
+        1280,
+        720
+      ]
+    },
+    "10-skylark": {
+      "title": "10 Skylark",
+      "vimeoId": "1219398817",
+      "resolution": [
+        2160,
+        3840
+      ],
+      "author": "Daisy Li, Broker"
+    }
+  },
+  "clips": [
+    {
+      "source": "48-panorama",
+      "in": 10,
+      "out": 19,
+      "scene": "exterior"
+    },
+    {
+      "source": "8-panorama",
+      "in": 10,
+      "out": 20,
+      "scene": "exterior"
+    },
+    {
+      "source": "10-skylark",
+      "in": 14,
+      "out": 20,
+      "scene": "exterior",
+      "cropY": 1460
+    },
+    {
+      "source": "102-nest-pine",
+      "in": 22,
+      "out": 30,
+      "scene": "exterior"
+    },
+    {
+      "source": "48-panorama",
+      "in": 174,
+      "out": 183,
+      "scene": "exterior"
+    },
+    {
+      "source": "48-panorama",
+      "in": 32,
+      "out": 38,
+      "scene": "interior"
+    },
+    {
+      "source": "48-panorama",
+      "in": 142,
+      "out": 148,
+      "scene": "exterior"
+    },
+    {
+      "source": "8-panorama",
+      "in": 21,
+      "out": 29,
+      "scene": "exterior"
+    },
+    {
+      "source": "102-nest-pine",
+      "in": 32,
+      "out": 40,
+      "scene": "exterior"
+    },
+    {
+      "source": "10-skylark",
+      "in": 37,
+      "out": 41.5,
+      "scene": "exterior",
+      "cropY": 1460
+    },
+    {
+      "source": "102-nest-pine",
+      "in": 175,
+      "out": 182,
+      "scene": "exterior"
+    },
+    {
+      "source": "8-panorama",
+      "in": 51,
+      "out": 56,
+      "scene": "interior"
+    },
+    {
+      "source": "8-panorama",
+      "in": 39,
+      "out": 42,
+      "scene": "exterior"
+    },
+    {
+      "source": "48-panorama",
+      "in": 156,
+      "out": 164,
+      "scene": "exterior"
+    },
+    {
+      "source": "8-panorama",
+      "in": 174,
+      "out": 182,
+      "scene": "exterior"
+    },
+    {
+      "source": "10-skylark",
+      "in": 103.5,
+      "out": 107.5,
+      "scene": "exterior",
+      "cropY": 1460
+    },
+    {
+      "source": "102-nest-pine",
+      "in": 188,
+      "out": 198,
+      "scene": "exterior"
+    },
+    {
+      "source": "8-panorama",
+      "in": 184,
+      "out": 194,
+      "scene": "exterior"
+    },
+    {
+      "source": "48-panorama",
+      "in": 184,
+      "out": 190,
+      "scene": "exterior"
     }
   ],
   "output": {
-    "codec": "H.264",
-    "crf720": 19,
-    "crf1080": 18,
+    "durationSeconds": 67.75,
+    "exteriorSeconds": 62.25,
+    "exteriorPercent": 91.9,
     "audio": false,
-    "renditions": [
-      "1920x1080",
-      "1280x720"
-    ],
-    "hlsJsVersion": "1.7.2",
-    "framesPerSecond": 48,
-    "speed": 2,
-    "durationSeconds": 268.5,
     "speedBakedIntoFile": true,
-    "segmentSeconds": 4
+    "segmentSeconds": 4,
+    "crf1080": 17,
+    "crf720": 19,
+    "renditions": [
+      {
+        "height": 720,
+        "width": 1280,
+        "codec": "avc1.64002a",
+        "bandwidth": 15024407,
+        "averageBandwidth": 8376433,
+        "duration": 67.75,
+        "bytes": 70937920,
+        "segments": 17
+      },
+      {
+        "height": 1080,
+        "width": 1920,
+        "codec": "avc1.64002a",
+        "bandwidth": 30094167,
+        "averageBandwidth": 19011484,
+        "duration": 67.75,
+        "bytes": 161003506,
+        "segments": 17
+      }
+    ]
   }
 }
