@@ -1,4 +1,4 @@
-/* Fill Safari's screen edges; keep header controls below the sensor area. */
+/* Keep navigation controls below the sensor area on mobile browsers. */
 :root{
   --safe-top:env(safe-area-inset-top,0px);
   --safe-bottom:env(safe-area-inset-bottom,0px);
@@ -12,6 +12,13 @@ html{background:#fff}
 }
 .home-page .site-header{
   height:calc(var(--home-header-height) + var(--safe-top));
+}
+/* Extend the existing film into the top inset without moving its controls
+   or changing the hero's bottom edge. The poster uses the same bounds. */
+.home-page .home-intro>.hero-photo{
+  top:calc(0px - var(--safe-top));
+  bottom:0;
+  height:auto;
 }
 .home-intro{min-height:calc(100dvh - var(--home-header-height) - var(--safe-top))}
 .site-footer{padding-bottom:var(--safe-bottom)}
