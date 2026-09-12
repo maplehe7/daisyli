@@ -107,8 +107,11 @@
     };properties.set(String(result.id).toUpperCase(),result);return result;
   }
   async function request(action,params={}, {signal,method='POST'}={}) {
+    const release = root.DaisyHeroVideo?.contentRequest?.();
+    try {
     const response=await fetch('/wp-json/daisy/v1/idx/'+action+(method==='GET'?'?'+new URLSearchParams(params):''),{method,credentials:'same-origin',signal,headers:method==='POST'?{'Content-Type':'application/json'}:{},body:method==='POST'?JSON.stringify(params):undefined});
     const data=await response.json();if(!response.ok){const error=new Error(data.error||'Please try again.');error.status=response.status;throw error;}return data;
+    } finally { release?.(); }
   }
   async function citiesList(){
     if(!allCitiesPromise)allCitiesPromise=request('cities',{}, {method:'GET'}).then(data=>{for(const city of data.cities)cities[city.name]=String(city.value);return data.cities;}).catch(error=>{allCitiesPromise=null;throw error;});
