@@ -3,9 +3,12 @@
   --safe-top:env(safe-area-inset-top,0px);
   --safe-bottom:env(safe-area-inset-bottom,0px);
   --header-content-height:116px;
+  --home-top-offset:0px;
 }
 html{background:#fff}
+html[data-home-film-edge],html[data-home-film-edge] body{background-color:#26312f}
 .home-page{--home-header-height:var(--header-content-height)}
+.home-page main{padding-top:var(--home-top-offset)}
 .site-header{
   height:calc(var(--header-content-height) + var(--safe-top));
   padding-top:var(--safe-top);
@@ -23,7 +26,10 @@ html{background:#fff}
 .home-intro{min-height:calc(100dvh - var(--home-header-height) - var(--safe-top))}
 .site-footer{padding-bottom:var(--safe-bottom)}
 @media(max-width:900px){
-  :root{--header-content-height:96px}
+  :root{--header-content-height:96px;--home-top-offset:64px}
+  /* Leave real film pixels above the visible page for mobile browser chrome.
+     Scrolling by this same offset preserves the original content positions. */
+  .home-page .home-intro>.hero-photo{top:calc(0px - max(var(--home-top-offset),var(--safe-top)))}
   .site-header #main-nav,.home-page #main-nav{
     top:100%;
     max-height:calc(100svh - var(--header-content-height) - var(--safe-top) - var(--safe-bottom) - 8px);

@@ -1,4 +1,33 @@
 'use strict';
+// A small amount of real page content above the opening lets mobile browsers
+// composite the film at the top edge instead of exposing the document canvas.
+window.DaisyHomeViewport=(() => {
+  let previousOffset=0;
+  function offset(){
+    if(!document.body.classList.contains('home-page'))return 0;
+    const main=document.getElementById('main');
+    return main?parseFloat(getComputedStyle(main).paddingTop)||0:0;
+  }
+  function scrollToTop(){window.scrollTo({top:offset(),left:0,behavior:'instant'});}
+  function syncSize(){
+    if(document.documentElement.classList.contains('dialog-scroll-locked'))return;
+    const next=offset();
+    if(document.body.classList.contains('home-page')&&next!==previousOffset){
+      window.scrollTo({top:Math.max(0,window.scrollY+next-previousOffset),left:window.scrollX,behavior:'instant'});
+    }
+    previousOffset=next;
+  }
+  // Native scroll-to-top should return to the same visible opening. Never
+  // reposition while a dialog is locked or a visitor is editing a field.
+  window.addEventListener('scrollend',()=>{
+    const top=offset();
+    if(top&&window.scrollY<top&&!document.documentElement.classList.contains('dialog-scroll-locked')&&
+      !document.activeElement?.matches('input,textarea,select,[contenteditable="true"]'))scrollToTop();
+  });
+  window.addEventListener('resize',syncSize);
+  return {offset,scrollToTop,syncSize,bind(){previousOffset=offset();}};
+})();
+
 const mobileMenuViewport=matchMedia('(max-width:900px)');
 const reducedMenuMotion=matchMedia('(prefers-reduced-motion:reduce)');
 let menuAnimation;
@@ -37,6 +66,7 @@ function positionHomeSearch(){
   if(form&&strip&&form.parentElement!==strip)strip.append(form);
 }
 function bindMobileLayout(){
+  DaisyHomeViewport.bind();
   mobileSearchObserver?.disconnect();
   positionHomeSearch();
   const form=document.getElementById('advanced-search'),dock=document.getElementById('mobile-search-dock');
@@ -60,18 +90,28 @@ document.addEventListener('click',event=>{
   const header=document.querySelector('.site-header');
   const nav=document.getElementById('main-nav');
   let previousY=window.scrollY,travel=0,direction=0,frame=0;
+  function syncBrowserColor(showFilm){
+    const active=showFilm&&DaisyHomeViewport.offset()>0;
+    const root=document.documentElement;
+    if(root.hasAttribute('data-home-film-edge')!==active)root.toggleAttribute('data-home-film-edge',active);
+    const color=active?'#26312f':'#ffffff';
+    document.querySelectorAll('meta[name="theme-color"]').forEach(meta=>{if(meta.content!==color)meta.content=color;});
+  }
   function render(reset=false){
     const home=document.body.classList.contains('home-page');
     if(!home){
+      syncBrowserColor(false);
       header.classList.remove('home-header-clear','home-header-hidden');
       previousY=window.scrollY;travel=0;direction=0;return;
     }
     // Opening a dialog fixes the body and temporarily changes window.scrollY.
     if(document.documentElement.classList.contains('dialog-scroll-locked'))return;
-    const y=Math.max(0,Math.min(window.scrollY,document.documentElement.scrollHeight-window.innerHeight));
+    if(reset)DaisyHomeViewport.syncSize();
+    const y=Math.max(0,Math.min(window.scrollY,document.documentElement.scrollHeight-window.innerHeight)-DaisyHomeViewport.offset());
     const menuOpen=nav.classList.contains('open');
     if(reset){previousY=y;travel=0;direction=0;header.classList.remove('home-header-hidden');}
     header.classList.toggle('home-header-clear',y<=2&&!menuOpen);
+    syncBrowserColor(y<=2&&!menuOpen);
     if(y<=2||menuOpen){
       header.classList.remove('home-header-hidden');travel=0;direction=0;
     }else{
