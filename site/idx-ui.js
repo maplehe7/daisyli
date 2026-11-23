@@ -125,22 +125,54 @@ function labelPortfolioLinks(){
 }
 labelPortfolioLinks();
 
-// These homes and photos were published in the brokerage's original portfolio.html.
+// Closed transactions from Daisy’s original public sold page and portfolio.
 const pastPortfolioHomes=[
-  {address:'102 Nest Pine',city:'Irvine',zip:'92602',price:4000000,beds:4,baths:4.5,sqft:4566,image:'102_nestpine.png'},
-  {address:'25 Bellflower',city:'Lake Forest',zip:'92630',price:1860000,beds:4,baths:4.5,sqft:2769,image:'25_bellflower.png'},
-  {address:'17 Sorrel',city:'Lake Forest',zip:'92630',price:null,beds:5,baths:5.5,sqft:3850,image:'17sorrel.jpg'},
-  {address:'133 Iron Horse',city:'Irvine',zip:'92602',price:1578000,beds:4,baths:3,sqft:2709,image:'133_ironhouse.png'}
+  {"address": "48 Panorama", "city": "Coto de Caza", "zip": "92679", "price": 5880000, "beds": 5, "baths": 4.5, "sqft": 5100, "photo": "/assets/property-F2B85D1C-B182-4E8E-BC1A-091890069EC3.jpg", "role": "seller"},
+  {"address": "2 Havenhurst Drive", "city": "Coto de Caza", "zip": "92679", "price": 5450000, "beds": 6, "baths": 5.5, "sqft": 6050, "photo": "/assets/property-D2B78D4F-98E6-47DF-9119-F45CD0401611.jpg", "role": "seller"},
+  {"address": "5 Winston Drive", "city": "Coto de Caza", "zip": "92679", "price": 5080000, "beds": 5, "baths": 4.5, "sqft": 5684, "photo": "/assets/property-C4DFA291-2B01-4736-9569-0DA3B5DC578D.jpg", "role": "buyer", "listingAgent": "Vicki Meyer", "listingOffice": "Seven Gables Real Estate", "listingContact": "tel:7144694719"},
+  {"address": "8 Panorama", "city": "Coto de Caza", "zip": "92679", "price": 4399500, "beds": 6, "baths": 4.5, "sqft": 5000, "photo": "/assets/property-5D02C9E0-EB53-4B41-8938-7DCA801BD01E.jpg", "role": "seller"},
+  {"address": "2 Havenhurst Drive", "city": "Coto de Caza", "zip": "92679", "price": 4500000, "beds": 6, "baths": 6, "sqft": 6050, "photo": "/assets/property-A0D1EAB0-30E0-4E4F-85DD-983D04DC1503.jpg"},
+  {"address": "102 Nest Pine", "city": "Irvine", "zip": "92602", "price": 4000000, "beds": 4, "baths": 4.5, "sqft": 4566, "photo": "https://maplehe7.github.io/daisyli/102_nestpine.png"},
+  {"address": "6105 Gallop Heights Ct.", "city": "San Diego", "zip": "92130", "price": 3900000, "beds": 5, "baths": 4, "sqft": 5288, "photo": "/assets/property-D7D5F697-5FF1-4379-B428-EA11CB25DE5B.jpg"},
+  {"address": "35 Cherry Hills Drive", "city": "Coto de Caza", "zip": "92679", "price": 3450000, "beds": 5, "baths": 4.5, "sqft": 4550, "photo": "/assets/property-3FF64405-BEE3-4D8E-9CD1-614E838AAAEE.jpg", "role": "buyer", "listingAgent": "Flo Bullock", "listingOffice": "Bullock Russell RE Services"},
+  {"address": "12 Van Gogh Way", "city": "Coto de Caza", "zip": "92679", "price": 3500000, "beds": 6, "baths": 4.5, "sqft": 4841, "photo": "/assets/property-960BF506-1F53-4F5D-A7AA-BC0D291D53E6.jpg", "role": "buyer", "listingAgent": "Meredith Giraudi", "listingOffice": "Grand Avenue Realty & Lending"},
+  {"address": "2 Lafayette Lane", "city": "Coto de Caza", "zip": "92679", "price": 2860000, "beds": 5, "baths": 4.5, "sqft": 4000, "photo": "/assets/property-D5AA13B3-2459-4174-958E-491B44A83F5A.jpg", "role": "buyer", "listingAgent": "Flo Bullock", "listingOffice": "Bullock Russell RE Services"},
+  {"address": "8 Panorama", "city": "Coto de Caza", "zip": "92679", "price": 2920000, "beds": 6, "baths": 5, "sqft": 5000, "photo": "/assets/property-68609AC4-D8D2-4A4F-B696-2A579DE5AB2E.jpg"},
+  {"address": "27631 Manor Hill", "city": "Laguna Niguel", "zip": "92677", "price": 2810000, "beds": 4, "baths": 4.5, "sqft": 3698, "role": "buyer", "listingAgent": "Robert Najafinia", "listingOffice": "Realty One Group West", "listingContact": "tel:9493004388"},
+  {"address": "32 Hubbard Way", "city": "Coto de Caza", "zip": "92679", "price": 2778000, "beds": 5, "baths": 4.5, "sqft": 4232, "photo": "/assets/property-51FD6C85-932B-42E1-8DD0-BF8E437A3B05.jpg", "role": "seller"},
+  {"address": "28932 Drakes Bay", "city": "Laguna Niguel", "zip": "92677", "price": 2530000, "beds": 4, "baths": 3.5, "sqft": 3940, "role": "buyer", "listingAgent": "Nhu White", "listingOffice": "Frontier Realty Inc"},
+  {"address": "19 Hubbard Way", "city": "Coto de Caza", "zip": "92679", "price": 2355000, "beds": 3, "baths": 4.5, "sqft": 4232, "photo": "/assets/property-5A28888D-1240-4A3D-B67F-C0AD184DCC62.jpg", "role": "buyer", "listingAgent": "Jonathan Minerick", "listingOffice": "Homecoin.com"},
+  {"address": "17 Pebble", "city": "Coto de Caza", "zip": "92679", "price": 2300000, "beds": 5, "baths": 4.5, "sqft": 3748, "photo": "/assets/property-AC4089F9-3E05-4AB4-B14D-DADE12DD5753.jpg", "role": "buyer", "listingAgent": "Donnie Bowen", "listingOffice": "Re/Max Real Estate Group"},
+  {"address": "11 Kennedy Court", "city": "Coto de Caza", "zip": "92679", "price": 2075000, "beds": 5, "baths": 4.5, "sqft": 3543, "photo": "/assets/property-133AD58B-1EE8-4830-85F6-59E9E947F3EF.jpg", "role": "buyer", "listingAgent": "John Russell", "listingOffice": "Pacific Sotheby's Int'l Realty"},
+  {"address": "5 Madison Lane", "city": "Coto de Caza", "zip": "92679", "price": 2150000, "beds": 5, "baths": 4.5, "sqft": 3543, "photo": "/assets/property-8AD56A5A-04F5-4117-924D-354571AB9F4A.jpg", "role": "buyer", "listingAgent": "Eliisa Stowell", "listingOffice": "Surterre Properties Inc."},
+  {"address": "26 Los Indios", "city": "Irvine", "zip": "92618", "price": 2031000, "beds": 4, "baths": 3, "sqft": 2339, "photo": "/assets/property-9F619D90-EF77-4DE6-A4F9-44CF08B18C29.jpg", "role": "seller"},
+  {"address": "25 Bellflower", "city": "Lake Forest", "zip": "92630", "price": 1860000, "beds": 4, "baths": 4.5, "sqft": 2769, "photo": "https://maplehe7.github.io/daisyli/25_bellflower.png"},
+  {"address": "10 Torosa", "city": "Lake Forest", "zip": "92630", "price": 1520000, "beds": 4, "baths": 3, "sqft": 2133, "photo": "/assets/property-42721ADE-8C4F-4C05-B2BA-616A20C084BD.jpg", "role": "seller"},
+  {"address": "133 Iron Horse", "city": "Irvine", "zip": "92602", "price": 1580000, "beds": 4, "baths": 3, "sqft": 2709, "photo": "https://maplehe7.github.io/daisyli/133_ironhouse.png"},
+  {"address": "20866 Parkside", "city": "Lake Forest", "zip": "92630", "price": 1550000, "beds": 6, "baths": 5, "sqft": 3598, "photo": "/assets/property-F408DB68-0C68-478F-9D3C-EF9C2B4351D9.jpg"},
+  {"address": "70 Loganberry", "city": "Irvine", "zip": "92620", "price": 1480000, "beds": 4, "baths": 4, "sqft": 0, "photo": "https://maplehe7.github.io/daisyli/70_loganberry.png"},
+  {"address": "292 Pasto Rico", "city": "Rancho Santa Margarita", "zip": "92688", "price": 648000, "beds": 2, "baths": 2, "sqft": 1032, "photo": "/assets/property-ED7220E1-D9D6-4981-B00E-FBB7A20FCB3C.jpg", "role": "buyer", "listingAgent": "Pam Fecher", "listingOffice": "First Team Real Estate"},
+  {"address": "17 Sorrel", "city": "Lake Forest", "zip": "92630", "price": null, "beds": 5, "baths": 5.5, "sqft": 3850, "photo": "https://maplehe7.github.io/daisyli/17sorrel.jpg"}
 ];
+const portfolioRoles={
+  buyer:['Represented buyer','买方代理'],
+  seller:['Represented seller','卖方代理'],
+  both:['Represented buyer and seller','买卖双方代理']
+};
 function pastPortfolioCard(home){
-  const photo='https://maplehe7.github.io/daisyli/'+home.image;
-  return `<article class="property-card">
-    <div class="property-image"><img src="${escapeHTML(photo)}" alt="" loading="lazy" width="640" height="440"></div>
+  const chinese=siteLanguage==='zh';
+  const role=home.role ? portfolioRoles[home.role][chinese ? 1 : 0] : '';
+  const agent=escapeHTML(home.listingAgent);
+  const credit=home.listingContact ? `<a href="${escapeHTML(home.listingContact)}">${agent}</a>` : agent;
+  return `<article class="property-card portfolio-card${home.photo ? '' : ' portfolio-card--text'}">
+    ${home.photo ? `<div class="property-image"><img src="${escapeHTML(home.photo)}" alt="" loading="lazy" width="640" height="440"></div>` : ''}
     <div class="property-info">
       <div class="property-price">${home.price===null?'Price upon request':money(home.price)}</div>
       <h3>${escapeHTML(home.address)}</h3>
       <p class="property-city">${escapeHTML(home.city)}, CA ${escapeHTML(home.zip)}</p>
       <div class="property-facts"><span>${home.beds} beds</span><span>${home.baths} baths</span><span>${number(home.sqft)} sq ft</span></div>
+      ${role ? `<p class="portfolio-role">${role}</p>` : ''}
+      ${agent ? `<p class="portfolio-credit">${chinese?'挂牌代理':'Listed by'} ${credit} · ${escapeHTML(home.listingOffice)}</p>` : ''}
     </div>
   </article>`;
 }
