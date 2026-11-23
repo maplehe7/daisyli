@@ -167,3 +167,18 @@ main:has(>.search-page-intro) .contact-band .button{font-size:18px;min-height:60
 @media(max-width:300px){
   body:has(.search-page-intro) .site-header .brand>span{font-size:18px;letter-spacing:.8px}
 }
+
+.matrix-search {
+  padding-bottom: 56px;
+}
+.matrix-search-link {
+  width: fit-content;
+  margin-bottom: 12px;
+}
+.matrix-search-frame {
+  display: block;
+  width: 100%;
+  height: max(560px, 78vh);
+  height: max(560px, 78dvh);
+  border: 1px solid var(--line, #dce3d7);
+}
