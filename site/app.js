@@ -55,13 +55,13 @@ function searchPage() {
   const chinese = siteLanguage === 'zh';
   return `<section class="matrix-search-page" aria-labelledby="matrix-search-title">
     <div class="wrap matrix-search">
-      <header class="matrix-search-heading">
+      <div class="matrix-search-heading">
         <div>
           <h1 id="matrix-search-title">Home Search</h1>
           <p>${chinese ? '用筛选条件缩小范围，例如邮编、价格和房屋类型。' : 'Use Filters to narrow by ZIP code, price, or property type.'}</p>
         </div>
         <a class="button button-outline matrix-search-link" href="${matrixSearchUrl}" target="_blank" rel="noopener">${chinese ? '在新标签页中打开' : 'Open in a new tab'} ${diagonal}</a>
-      </header>
+      </div>
       <iframe class="matrix-search-frame" src="${matrixSearchUrl}" title="${chinese ? 'CRMLS 地图房源搜索' : 'CRMLS map property search'}"></iframe>
     </div>
   </section>`;
