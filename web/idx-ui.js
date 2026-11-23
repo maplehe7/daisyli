@@ -125,41 +125,83 @@ function labelPortfolioLinks(){
 }
 labelPortfolioLinks();
 
+// These homes and photos were published in the brokerage's original portfolio.html.
+const pastPortfolioHomes=[
+  {address:'102 Nest Pine',city:'Irvine',zip:'92602',price:4000000,beds:4,baths:4.5,sqft:4566,image:'102_nestpine.png'},
+  {address:'25 Bellflower',city:'Lake Forest',zip:'92630',price:1860000,beds:4,baths:4.5,sqft:2769,image:'25_bellflower.png'},
+  {address:'17 Sorrel',city:'Lake Forest',zip:'92630',price:null,beds:5,baths:5.5,sqft:3850,image:'17sorrel.jpg'},
+  {address:'133 Iron Horse',city:'Irvine',zip:'92602',price:1578000,beds:4,baths:3,sqft:2709,image:'133_ironhouse.png'}
+];
+function pastPortfolioCard(home){
+  const photo='https://maplehe7.github.io/daisyli/'+home.image;
+  return `<article class="property-card">
+    <div class="property-image"><img src="${escapeHTML(photo)}" alt="" loading="lazy" width="640" height="440"></div>
+    <div class="property-info">
+      <div class="property-price">${home.price===null?'Price upon request':money(home.price)}</div>
+      <h3>${escapeHTML(home.address)}</h3>
+      <p class="property-city">${escapeHTML(home.city)}, CA ${escapeHTML(home.zip)}</p>
+      <div class="property-facts"><span>${home.beds} beds</span><span>${home.baths} baths</span><span>${number(home.sqft)} sq ft</span></div>
+    </div>
+  </article>`;
+}
+
 function bindLivePortfolio(){
   const section=document.querySelector('.catalogue-section');
   const grid=document.getElementById('catalog-grid'),count=document.getElementById('listing-count');
   const city=document.getElementById('catalog-city'),sort=document.getElementById('catalog-sort');
   const heading=document.querySelector('main h1');
   heading.textContent='Portfolio';document.title='Portfolio · Daisy Li';
+  const notice=document.createElement('div');
+  notice.innerHTML='<span role="status"></span> <button type="button" class="text-link" hidden>Try again</button>';
+  count.after(notice);
+  const status=notice.querySelector('[role="status"]'),retry=notice.querySelector('button');
   let items=[];
+  let showingArchive=false;
   const update=()=>{
-    const filtered=items.filter(item=>!city.value||item.city.toLowerCase()===city.value.toLowerCase())
-      .sort((a,b)=>sort.value==='price-asc'?a.price-b.price:b.price-a.price);
+    const ascending=sort.value==='price-asc';
+    const filtered=items.filter(item=>!city.value||item.city.toLowerCase()===city.value.toLowerCase());
+    const sorted=filtered.filter(item=>item.price!==null).sort((a,b)=>ascending?a.price-b.price:b.price-a.price);
+    sorted.push(...filtered.filter(item=>item.price===null));
     count.textContent=`${number(filtered.length)} ${filtered.length===1?'home':'homes'}`;
-    grid.innerHTML=filtered.length?cards(filtered):'<div class="empty-state"><h2>No matching homes</h2></div>';
-    section.querySelector('.idx-catalog-extra').innerHTML='';
-    bindIdxImages(grid);applyLanguage(section);
+    if(!sorted.length)grid.innerHTML='<div class="empty-state"><h2>No matching homes</h2></div>';
+    else grid.innerHTML=showingArchive?sorted.map(pastPortfolioCard).join(''):cards(sorted);
+    if(!showingArchive)bindIdxImages(grid);
+    applyLanguage(section);
   };
   const load=async()=>{
     const controller=new AbortController();idxControllers.add(controller);
     const timeout=setTimeout(()=>controller.abort(),45000);
-    grid.innerHTML=idxLoading();grid.setAttribute('aria-busy','true');count.textContent='';applyLanguage(grid);
-    city.disabled=sort.disabled=true;
+    if(!showingArchive){
+      grid.innerHTML=idxLoading();count.textContent='';applyLanguage(grid);
+      city.disabled=sort.disabled=true;
+    }
+    grid.setAttribute('aria-busy','true');retry.disabled=true;
     try{
-      items=await DaisyIDX.portfolio({signal:controller.signal});if(!grid.isConnected||controller.signal.aborted)return;
-      // Filter the complete verified portfolio locally; adding a city to Apex's
-      // collection query can switch it to general regional search results.
-      const locations=[...new Set(items.map(item=>item.city).filter(Boolean))].sort();
-      city.replaceChildren(new Option('All locations',''),...locations.map(name=>new Option(name,name)));
-      update();
-    }catch(error){
+      const liveItems=await DaisyIDX.portfolio({signal:controller.signal});
+      controller.signal.throwIfAborted();
+      items=liveItems;
+      showingArchive=false;
+    }catch{
       controller.abort();
-      if(grid.isConnected){grid.innerHTML=idxFailure();applyLanguage(grid);grid.querySelector('[data-idx-retry]').onclick=load;}
+      items=pastPortfolioHomes;
+      showingArchive=true;
     }finally{
       clearTimeout(timeout);idxControllers.delete(controller);
-      if(grid.isConnected){grid.removeAttribute('aria-busy');city.disabled=sort.disabled=false;}
     }
+    if(!grid.isConnected)return;
+    // An Apex city query can switch the portfolio to a regional search.
+    const selectedCity=city.value;
+    const locations=[...new Set(items.map(item=>item.city).filter(Boolean))].sort();
+    city.replaceChildren(new Option('All locations',''),...locations.map(name=>new Option(name,name)));
+    if(locations.includes(selectedCity))city.value=selectedCity;
+    status.textContent=showingArchive?'Showing selected past portfolio homes while the live feed is unavailable.':'';
+    retry.hidden=!showingArchive;
+    retry.disabled=false;
+    city.disabled=sort.disabled=false;
+    update();
+    grid.removeAttribute('aria-busy');
   };
+  retry.addEventListener('click',load);
   city.addEventListener('change',()=>update());sort.addEventListener('change',()=>update());load();
 }
 

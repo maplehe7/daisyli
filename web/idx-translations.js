@@ -6,6 +6,8 @@ Object.assign(chineseUI,{
 });
 Object.assign(chineseUI,{
  'Send text':'发送短信',
+ 'Showing selected past portfolio homes while the live feed is unavailable.':'实时房源暂不可用，以下展示部分过往房产案例。',
+ 'Price upon request':'价格请咨询',
  'No other homes for sale in this area.':'此区域暂无其他在售房源。','Could not load nearby homes.':'暂时无法加载附近房源。',
  'Required':'必选','Status':'房源状态',
  'My Account':'我的账户','Saved homes':'已收藏房源','Saved searches':'已保存搜索','Profile':'个人信息','Sign out':'退出登录','Sign in':'登录','Create account':'创建账户','Reset password':'重置密码','Forgot password?':'忘记密码？','Password':'密码','Name':'姓名','Close':'关闭','Save':'收藏','Saved':'已收藏','Search name':'搜索名称','Email alerts':'邮件提醒','Email alerts off':'邮件提醒已关闭','Frequency':'频率','Instant':'即时','Daily':'每天','Every other day':'每隔一天','Weekly':'每周','Every 30 days':'每30天','Edit saved search':'编辑已保存搜索','Edit filters':'编辑筛选条件','Delete':'删除','No saved searches':'暂无已保存搜索','No saved homes':'暂无收藏房源','Password reset email sent.':'密码重置邮件已发送。','Search saved.':'搜索已保存。','Please sign in.':'请登录。','Please sign in again.':'请重新登录。','Please check your email and password.':'请检查您的邮箱和密码。','Please enter your password.':'请输入密码。','Please enter a valid email address.':'请输入有效的邮箱地址。','Use at least 4 characters for your password.':'密码至少需要4个字符。','An account already exists with that email. Please sign in.':'该邮箱已有账户，请登录。','Please check your information and try again.':'请检查您的信息并重试。','Enter a search name.':'请输入搜索名称。','Please try again.':'请重试。','Temporarily unavailable. Please try again.':'暂时无法使用，请重试。',
