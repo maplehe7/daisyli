@@ -7,7 +7,22 @@ document.querySelectorAll('link[rel~="icon"]').forEach(icon => {
 // Keep the existing WordPress entry page in sync with the hosted header assets.
 const headerBrand = document.querySelector('.site-header .brand');
 headerBrand.querySelector('span').textContent = 'Daisy Li, Broker';
-headerBrand.querySelector('img').src = '/assets/daisylogo_black.png';
+const isBrokerSite = /^(www\.)?daisylibroker\.com$/.test(location.hostname);
+const installedAssets = '/wp-content/plugins/daisy-site/public/';
+for (const [selector, file] of [
+  ['.site-header .brand img', 'daisylogo_black.png'],
+  ['.footer-top .brand img', 'daisylogo.png']
+]) {
+  const logo = document.querySelector(selector);
+  if (!logo) continue;
+  const fallback = '/assets/' + file;
+  if (isBrokerSite) {
+    logo.addEventListener('error', () => { logo.src = fallback; }, {once:true});
+    logo.src = installedAssets + 'assets/' + file;
+  } else {
+    logo.src = fallback;
+  }
+}
 document.querySelector('#main-nav a[href="/account"]')?.remove();
 if(!document.querySelector('#main-nav .nav-phone')){
   const phoneLink=document.createElement('a');
@@ -41,7 +56,7 @@ function favoriteButton(p){return `<button class="favorite" data-save-home="${es
 function propertyCard(p){const href=escapeHTML(DaisyIDX.propertyURL(p));const imageURL=p.live?p.image:'/'+p.image;const native='';return `<article class="property-card"><div class="property-image"><a href="${href}"${native} aria-label="View ${escapeHTML(p.address)}">${p.image?`<img src="${escapeHTML(imageURL)}" alt="${escapeHTML(p.address)}, ${escapeHTML(p.city)}" loading="lazy" width="640" height="440">`:'<div class="photo-unavailable">Photo unavailable</div>'}</a><span class="property-status ${p.status==='Sold'?'status-sold':''}">${escapeHTML(p.status)}</span>${favoriteButton(p)}</div><div class="property-info"><div class="property-price">${money(p.price)}<a href="${href}"${native} class="card-arrow" aria-label="View ${escapeHTML(p.address)}">${diagonal}</a></div><h3><a href="${href}"${native}>${escapeHTML(p.address)}</a></h3><p class="property-city">${escapeHTML(p.city)}, CA ${escapeHTML(p.zip)}</p><div class="property-facts"><span>${p.beds} beds</span><span>${p.baths} baths</span><span>${number(p.sqft)} sq ft</span></div><p class="property-mls">MLS #${escapeHTML(p.mls)} · <a href="${href}"${native}>Full details ↗</a></p></div></article>`;}
 function cards(items){return items.map(propertyCard).join('');}
 function cta(){return `<section class="contact-band"><div class="wrap contact-band-inner"><div><h2>Work With Daisy</h2><p>List with Daisy today and she’ll get you the best deal on your home!</p></div><a class="button button-light" href="/contact">LET’S CONNECT ${arrow}</a></div></section>`;}
-function home(){return (DaisyHeroVideo.deferImages || (html=>html))(`<div class="home-intro"><div class="hero-photo"><img src="/assets/home-film-v4/poster-lite.jpg" alt="" fetchpriority="high" width="1920" height="1080"></div><section class="home-hero wrap" aria-labelledby="home-title"><div class="hero-copy"><h1 id="home-title">Daisy Li</h1><p class="home-credentials"><span>Broker</span><span aria-hidden="true"> | </span><span>DRE #01986831</span></p><p class="home-region">Orange County Real Estate</p></div>${homeSearchTrigger()}</section></div>${homeSearchDialog()}
+function home(){return (DaisyHeroVideo.deferImages || (html=>html))(`<div class="home-intro"><div class="hero-photo"><img src="/assets/home-film-v4/poster-lite.jpg" alt="" fetchpriority="high" width="1920" height="1080"></div><section class="home-hero wrap" aria-labelledby="home-title"><div class="hero-copy"><h1 id="home-title">Daisy Li</h1><p class="home-credentials"><span>Broker</span><span aria-hidden="true"> | </span><span>DRE #01986831</span></p><p class="home-region">Orange County Real Estate</p></div>${quickSearch()}</section></div>
 <section class="section wrap"><div class="section-heading"><div><h2>Featured Properties</h2></div><a class="text-link" href="/featured">Featured Homes ${arrow}</a></div><div class="property-grid" id="home-live-listings">${idxLoading()}</div></section>
 <section class="about-intro"><div class="wrap about-grid"><div class="portrait-frame"><img src="/assets/daisy-portrait.jpeg" alt="Daisy Li, Orange County real estate broker" width="500" height="540" loading="lazy"></div><div class="about-copy"><h2>About Daisy</h2><p>${escapeHTML(siteLanguage==='zh'?chineseContent.homeBio:originalContent.homeBio)}</p><a class="text-link" href="/about">LEARN MORE ${arrow}</a></div></div></section>
 <section class="section wrap"><div class="section-heading"><div><h2>Neighborhoods</h2></div><a class="text-link" href="/neighborhoods">Neighborhoods ${arrow}</a></div><div class="community-grid">${places.map(communityCard).join('')}</div></section>
@@ -51,36 +66,93 @@ function communityCard(p){return `<a class="community-card" href="/neighborhoods
 function pageIntro(title,description,extra=''){return `<div class="page-intro wrap"><h1>${title}</h1>${description?`<p>${description}</p>`:''}${extra}</div>`;}
 function catalogue(kind){const soldPage=kind==='sold';return `${pageIntro(soldPage?'Sold Homes':'Featured Homes','')}<section class="wrap catalogue-section"><div class="listing-toolbar"><div class="catalog-tabs"><a href="/featured" class="${!soldPage?'active':''}">Featured homes</a><a href="/sold" class="${soldPage?'active':''}">Sold homes</a></div><div class="toolbar-filters"><label class="sr-only" for="catalog-city">Filter by city</label><select id="catalog-city"><option value="">All locations</option>${places.map(p=>`<option value="${p.name}">${p.name}</option>`).join('')}</select><label class="sr-only" for="catalog-sort">Sort homes</label><select id="catalog-sort"><option value="default">Featured order</option><option value="price-asc">Price: low to high</option><option value="price-desc">Price: high to low</option></select><a class="text-link" href="/account">My Account</a></div></div><div class="results-meta"><span id="listing-count"></span></div><div class="property-grid" id="catalog-grid">${idxLoading()}</div><div class="idx-catalog-extra"></div></section>${cta()}`;}
 const matrixSearchUrl = 'https://matrix.crmls.org/Matrix/public/IDX.aspx?idx=fd6f332a';
-function matrixSearchFrame(embedded) {
-  const title = siteLanguage === 'zh' ? 'CRMLS 地图房源搜索' : 'CRMLS map property search';
-  return `<iframe class="matrix-search-frame" title="${title}"${embedded ? ` src="${matrixSearchUrl}"` : ''}></iframe>`;
+const publicResultsUrl = 'https://apexidx.com/idx_lite/results/';
+const publicSearchFilters = '/lastModified_orderBy/desc_order/home,Townhouse_homeType/active,short-sales,foreclosures_homeStatus';
+const homeCityAliases = {'尔湾':'Irvine','纽波特海滩':'Newport Beach','森林湖':'Lake Forest','科托德卡萨':'Coto de Caza'};
+let searchCityDirectory;
+
+function cityKey(name) {
+  return name.normalize('NFKC').trim().replace(/,\s*CA$/i,'').replace(/\s+/g,' ').toLowerCase();
 }
-function homeSearchTrigger() {
-  const label = siteLanguage === 'zh' ? '按城市或邮编搜索' : 'Search by city or ZIP';
-  return `<button type="button" class="home-search-trigger" id="home-search-trigger" aria-haspopup="dialog" aria-controls="home-search-dialog">
-    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="7.5"/><path d="m16 16 5 5"/></svg>
-    <span>${label}</span>${arrow}
-  </button>`;
+function loadSearchCities() {
+  if (!searchCityDirectory) {
+    searchCityDirectory = fetch('/assets/crmls-cities.json')
+      .then(response => {
+        if (!response.ok) throw Error('City directory unavailable');
+        return response.json();
+      })
+      .catch(error => {
+        searchCityDirectory = undefined;
+        throw error;
+      });
+  }
+  return searchCityDirectory;
 }
-function homeSearchDialog() {
-  const closeLabel = siteLanguage === 'zh' ? '关闭房源搜索' : 'Close home search';
-  return `<dialog class="matrix-search-dialog" id="home-search-dialog" aria-labelledby="home-search-title">
-    <div class="matrix-search-heading">
-      <h2 id="home-search-title">Home Search</h2>
-      <form method="dialog">
-        <button class="matrix-search-close" aria-label="${closeLabel}" autofocus>
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
-        </button>
-      </form>
-    </div>
-    ${matrixSearchFrame(false)}
-  </dialog>`;
+function quickSearch() {
+  const label = siteLanguage === 'zh' ? '城市或邮编' : 'City or ZIP code';
+  return `<form id="quick-search" class="home-search" role="search" action="/search">
+    <label class="home-search-field" for="home-location">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="7.5"/><path d="m16 16 5 5"/></svg>
+      <input id="home-location" name="location" type="search" list="home-city-list" aria-label="${label}" placeholder="${label}" autocomplete="off" enterkeyhint="search" maxlength="80" required>
+      <datalist id="home-city-list">${places.map(place=>`<option value="${escapeHTML(place.name)}"></option>`).join('')}</datalist>
+    </label>
+    <button class="button home-search-button" type="submit">Search</button>
+  </form>`;
+}
+function bindHomeSearch(form) {
+  const input = form.elements.location;
+  const button = form.querySelector('button');
+  form.addEventListener('focusin',()=>{
+    loadSearchCities().then(rows=>{
+      if (!form.isConnected) return;
+      form.querySelector('datalist').replaceChildren(...[...new Set(rows.map(([name])=>name))].map(name=>new Option(name)));
+    }).catch(()=>{});
+  },{once:true});
+  input.addEventListener('input',()=>input.setCustomValidity(''));
+  form.addEventListener('submit',async event=>{
+    event.preventDefault();
+    const value = input.value.normalize('NFKC').trim();
+    if (/^\d{5}(?:-\d{4})?$/.test(value)) {
+      navigate('/search?'+new URLSearchParams({zip:value.slice(0,5)}));
+      return;
+    }
+
+    const key = cityKey(homeCityAliases[value] || value);
+    button.disabled = true;
+    try {
+      const rows = await loadSearchCities();
+      if (!form.isConnected || input.value.normalize('NFKC').trim() !== value) return;
+      const ids = [...new Set(rows.filter(([name])=>cityKey(name)===key).map(([,id])=>id))];
+      if (ids.length) {
+        navigate('/search?'+new URLSearchParams({city:ids.join(',')}));
+        return;
+      }
+      input.setCustomValidity(siteLanguage==='zh'?'请输入城市名称或五位邮编。':'Enter a CRMLS city or a five-digit ZIP code.');
+      input.reportValidity();
+    } catch {
+      if (form.isConnected) {
+        input.setCustomValidity(siteLanguage==='zh'?'城市搜索暂不可用，请输入邮编。':'City search is temporarily unavailable. Try a ZIP code.');
+        input.reportValidity();
+        input.setCustomValidity('');
+      }
+    } finally {
+      button.disabled = false;
+    }
+  });
 }
 function searchPage() {
-  return `<section class="matrix-search-page" aria-labelledby="matrix-search-title">
-    <div class="matrix-search-heading"><h1 id="matrix-search-title">Home Search</h1></div>
-    ${matrixSearchFrame(true)}
-  </section>`;
+  const params = new URLSearchParams(location.search);
+  const zip = params.get('zip') || '';
+  const city = params.get('city') || '';
+  const language = siteLanguage === 'zh' ? 'CH_LA' : 'EN_LA';
+  const title = siteLanguage === 'zh' ? '房源搜索' : 'Property search';
+  let url = matrixSearchUrl;
+  if (/^\d{5}$/.test(zip)) {
+    url = publicResultsUrl + language + '/' + zip + '_zip' + publicSearchFilters;
+  } else if (/^\d{1,9}(?:,\d{1,9}){0,9}$/.test(city)) {
+    url = publicResultsUrl + language + publicSearchFilters + '/' + city + '_city';
+  }
+  return `<h1 class="sr-only">Home Search</h1><iframe class="home-search-frame" src="${escapeHTML(url)}" title="${title}"></iframe>`;
 }
 function about(){if(siteLanguage==='zh')return `<section class="about-hero wrap"><div class="about-hero-photo"><img src="/assets/daisy-portrait.jpeg" alt="Daisy Li" width="500" height="540"></div><div><h1>关于 Daisy</h1>${chineseContent.biography.map(p=>`<p>${escapeHTML(p)}</p>`).join('')}<a class="button" href="/contact">微信联系 ${arrow}</a></div></section>${cta()}`;return `<section class="about-hero wrap"><div class="about-hero-photo"><img src="/assets/daisy-portrait.jpeg" alt="Daisy Li" width="500" height="540"></div><div><h1>About Me</h1><p>${escapeHTML(originalContent.about[0])}</p><a class="button" href="/contact">Contact Me ${arrow}</a></div></section><section class="story-section wrap original-biography"><div class="story-copy">${originalContent.about.slice(1).map(p=>`<p>${escapeHTML(p)}</p>`).join('')}</div></section><section class="wrap chinese-story" lang="zh"><div>${originalContent.chinese.map(p=>`<p>${escapeHTML(p)}</p>`).join('')}</div></section>${cta()}`;}
 function communities(slug){const p=places.find(x=>x.slug===slug);if(!p)return `${pageIntro('Neighborhoods','')}<section class="wrap section community-index"><div class="community-grid">${places.map(communityCard).join('')}</div></section>${cta()}`;const properties=[true];const content=(siteLanguage==='zh'?chineseContent:originalContent).communities[p.slug];return `<section class="community-hero"><img src="/assets/${encodeURIComponent(p.image)}" alt="${p.name}" width="1400" height="600"><div class="wrap"><a class="back-link" href="/neighborhoods">All neighborhoods</a><h1>${p.name}</h1></div></section><section class="wrap community-story"><h2>${escapeHTML(content.heading)}</h2><div>${content.paragraphs.map(text=>`<p>${escapeHTML(text).replace(/\n\n/g,'<br><br>')}</p>`).join('')}<a class="button" href="/search">Search homes ${arrow}</a></div></section>${properties.length?`<section class="section wrap"><div class="section-heading"><h2>${p.name} homes</h2><a class="text-link" href="/search">Search homes ${arrow}</a></div><div class="property-grid" id="community-live-listings" data-city="${p.name}">${idxLoading()}</div></section>`:''}${cta()}`;}
@@ -93,15 +165,8 @@ function navigate(href){href=rememberLanguageURL(href);history.pushState({},'',h
 function closeMenu(){setMobileMenu(false);}
 function toast(message){const el=document.getElementById('toast');el.textContent=message;el.classList.add('show');clearTimeout(toast.timer);toast.timer=setTimeout(()=>el.classList.remove('show'),3200);}
 function bindPage(path){
-  if(path==='/'){
-    const trigger=document.getElementById('home-search-trigger');
-    const dialog=document.getElementById('home-search-dialog');
-    const frame=dialog.querySelector('iframe');
-    trigger.addEventListener('click',()=>{
-      dialog.showModal();
-      if(!frame.hasAttribute('src'))frame.src=matrixSearchUrl;
-    });
-  }
+  const quickSearchForm=document.getElementById('quick-search');
+  if(quickSearchForm)bindHomeSearch(quickSearchForm);
   if(path==='/featured'||path==='/sold')bindLiveCatalogue(path.slice(1));
   DaisyWeixin.bind();
 }

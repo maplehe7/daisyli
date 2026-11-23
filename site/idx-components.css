@@ -194,27 +194,3 @@
 @media(min-width:701px) and (max-width:767px){.property-contact{top:calc(86px + var(--safe-top,0px))}}
 @media print{.property-contact{display:none}}
 @media(prefers-reduced-motion:reduce){.calculator-toggle{transition:none}}
-
-.portfolio-card--text {
-  align-self: start;
-  padding: 20px;
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  background: var(--paper);
-}
-.portfolio-card--text .property-info {
-  padding-top: 0;
-}
-.portfolio-role,
-.portfolio-credit {
-  margin: 8px 0 0;
-  font-size: .8125rem;
-  line-height: 1.45;
-}
-.portfolio-role {
-  font-weight: 600;
-}
-.portfolio-credit a {
-  text-decoration: underline;
-  text-underline-offset: .15em;
-}

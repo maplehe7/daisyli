@@ -138,9 +138,9 @@ const pastPortfolioHomes=[
   {"address": "12 Van Gogh Way", "city": "Coto de Caza", "zip": "92679", "price": 3500000, "beds": 6, "baths": 4.5, "sqft": 4841, "photo": "/assets/property-960BF506-1F53-4F5D-A7AA-BC0D291D53E6.jpg", "role": "buyer", "listingAgent": "Meredith Giraudi", "listingOffice": "Grand Avenue Realty & Lending"},
   {"address": "2 Lafayette Lane", "city": "Coto de Caza", "zip": "92679", "price": 2860000, "beds": 5, "baths": 4.5, "sqft": 4000, "photo": "/assets/property-D5AA13B3-2459-4174-958E-491B44A83F5A.jpg", "role": "buyer", "listingAgent": "Flo Bullock", "listingOffice": "Bullock Russell RE Services"},
   {"address": "8 Panorama", "city": "Coto de Caza", "zip": "92679", "price": 2920000, "beds": 6, "baths": 5, "sqft": 5000, "photo": "/assets/property-68609AC4-D8D2-4A4F-B696-2A579DE5AB2E.jpg"},
-  {"address": "27631 Manor Hill", "city": "Laguna Niguel", "zip": "92677", "price": 2810000, "beds": 4, "baths": 4.5, "sqft": 3698, "role": "buyer", "listingAgent": "Robert Najafinia", "listingOffice": "Realty One Group West", "listingContact": "tel:9493004388"},
+  {"address": "27631 Manor Hill", "city": "Laguna Niguel", "zip": "92677", "price": 2810000, "beds": 4, "baths": 4.5, "sqft": 3698, "role": "buyer", "listingAgent": "Robert Najafinia", "listingOffice": "Realty One Group West", "listingContact": "tel:9493004388", "photo": "https://api.cotality.com/trestle/Media/Property/PHOTO-Jpeg/1189707174/1/NTIyNC80MDUzLzIw/MjAvMTkyMTYvMTc5MjU3Mjc4OQ/x69wDajX8yJkMzsCnSWvpGyWoGrRAi35CDJy6x2-vF0"},
   {"address": "32 Hubbard Way", "city": "Coto de Caza", "zip": "92679", "price": 2778000, "beds": 5, "baths": 4.5, "sqft": 4232, "photo": "/assets/property-51FD6C85-932B-42E1-8DD0-BF8E437A3B05.jpg", "role": "seller"},
-  {"address": "28932 Drakes Bay", "city": "Laguna Niguel", "zip": "92677", "price": 2530000, "beds": 4, "baths": 3.5, "sqft": 3940, "role": "buyer", "listingAgent": "Nhu White", "listingOffice": "Frontier Realty Inc"},
+  {"address": "28932 Drakes Bay", "city": "Laguna Niguel", "zip": "92677", "price": 2530000, "beds": 4, "baths": 3.5, "sqft": 3940, "role": "buyer", "listingAgent": "Nhu White", "listingOffice": "Frontier Realty Inc", "photo": "https://api.cotality.com/trestle/Media/Property/2006114150767/NTIyNC80MDUzLzIw/MjAvMTkyMTYvMTc5NTMzODUzNg/nAIwTB4O9PW8z8IdltbcHMtVqhHkX6o_gqsYdw5d-ZA"},
   {"address": "19 Hubbard Way", "city": "Coto de Caza", "zip": "92679", "price": 2355000, "beds": 3, "baths": 4.5, "sqft": 4232, "photo": "/assets/property-5A28888D-1240-4A3D-B67F-C0AD184DCC62.jpg", "role": "buyer", "listingAgent": "Jonathan Minerick", "listingOffice": "Homecoin.com"},
   {"address": "17 Pebble", "city": "Coto de Caza", "zip": "92679", "price": 2300000, "beds": 5, "baths": 4.5, "sqft": 3748, "photo": "/assets/property-AC4089F9-3E05-4AB4-B14D-DADE12DD5753.jpg", "role": "buyer", "listingAgent": "Donnie Bowen", "listingOffice": "Re/Max Real Estate Group"},
   {"address": "11 Kennedy Court", "city": "Coto de Caza", "zip": "92679", "price": 2075000, "beds": 5, "baths": 4.5, "sqft": 3543, "photo": "/assets/property-133AD58B-1EE8-4830-85F6-59E9E947F3EF.jpg", "role": "buyer", "listingAgent": "John Russell", "listingOffice": "Pacific Sotheby's Int'l Realty"},
@@ -164,15 +164,15 @@ function pastPortfolioCard(home){
   const role=home.role ? portfolioRoles[home.role][chinese ? 1 : 0] : '';
   const agent=escapeHTML(home.listingAgent);
   const credit=home.listingContact ? `<a href="${escapeHTML(home.listingContact)}">${agent}</a>` : agent;
-  return `<article class="property-card portfolio-card${home.photo ? '' : ' portfolio-card--text'}">
+  return `<article class="property-card portfolio-card">
     ${home.photo ? `<div class="property-image"><img src="${escapeHTML(home.photo)}" alt="" loading="lazy" width="640" height="440"></div>` : ''}
     <div class="property-info">
       <div class="property-price">${home.price===null?'Price upon request':money(home.price)}</div>
       <h3>${escapeHTML(home.address)}</h3>
       <p class="property-city">${escapeHTML(home.city)}, CA ${escapeHTML(home.zip)}</p>
       <div class="property-facts"><span>${home.beds} beds</span><span>${home.baths} baths</span><span>${number(home.sqft)} sq ft</span></div>
-      ${role ? `<p class="portfolio-role">${role}</p>` : ''}
-      ${agent ? `<p class="portfolio-credit">${chinese?'挂牌代理':'Listed by'} ${credit} · ${escapeHTML(home.listingOffice)}</p>` : ''}
+      ${role ? `<p class="property-city portfolio-role">${role}</p>` : ''}
+      ${agent ? `<p class="fine-print portfolio-credit">${chinese?'挂牌代理':'Listed by'} ${credit} · ${escapeHTML(home.listingOffice)}</p>` : ''}
     </div>
   </article>`;
 }
@@ -194,6 +194,11 @@ function bindLivePortfolio(){
     sorted.push(...filtered.filter(home=>home.price===null));
     count.textContent=`${number(filtered.length)} ${filtered.length===1?'home':'homes'}`;
     grid.innerHTML=sorted.length?sorted.map(pastPortfolioCard).join(''):'<div class="empty-state"><h2>No matching homes</h2></div>';
+    grid.querySelectorAll('img').forEach(image=>{
+      const removeEmptyPhoto=()=>image.closest('.property-image')?.remove();
+      image.addEventListener('error',removeEmptyPhoto,{once:true});
+      if(image.complete&&!image.naturalWidth)removeEmptyPhoto();
+    });
     applyLanguage(section);
   };
 
