@@ -168,17 +168,55 @@ main:has(>.search-page-intro) .contact-band .button{font-size:18px;min-height:60
   body:has(.search-page-intro) .site-header .brand>span{font-size:18px;letter-spacing:.8px}
 }
 
-.matrix-search {
-  padding-bottom: 56px;
+.matrix-search-page {
+  background: var(--paper);
+  padding-block: clamp(2rem, 4vw, 3.75rem) clamp(2.5rem, 5vw, 4.5rem);
 }
-.matrix-search-link {
-  width: fit-content;
-  margin-bottom: 12px;
+.matrix-search {
+  width: min(1280px, calc(100% - clamp(32px, 8vw, 112px)));
+}
+.matrix-search-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  justify-content: space-between;
+  gap: 16px 24px;
+  margin-bottom: 22px;
+}
+.matrix-search-heading h1 {
+  font-size: clamp(2.25rem, 4.5vw, 3.75rem);
+}
+.matrix-search-heading p {
+  margin: 8px 0 0;
+  color: var(--body);
+  font-size: .875rem;
+}
+.matrix-search-heading .matrix-search-link {
+  gap: 10px;
+  min-height: 44px;
+  padding: 10px 15px;
+  background: var(--white);
+}
+.matrix-search-heading .matrix-search-link:hover {
+  background: var(--soft);
+}
+.matrix-search-link svg {
+  width: 17px;
+  height: 17px;
 }
 .matrix-search-frame {
   display: block;
   width: 100%;
   height: max(560px, 78vh);
   height: max(560px, 78dvh);
-  border: 1px solid var(--line, #dce3d7);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--white);
+  box-shadow: 0 5px 22px #2038310c;
+}
+@media (max-width: 600px) {
+  .matrix-search-heading {
+    align-items: start;
+    flex-direction: column;
+  }
 }

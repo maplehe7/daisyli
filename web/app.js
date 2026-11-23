@@ -53,11 +53,18 @@ function catalogue(kind){const soldPage=kind==='sold';return `${pageIntro(soldPa
 const matrixSearchUrl = 'https://matrix.crmls.org/Matrix/public/IDX.aspx?idx=fd6f332a';
 function searchPage() {
   const chinese = siteLanguage === 'zh';
-  return `${pageIntro('Home Search', '')}
+  return `<section class="matrix-search-page" aria-labelledby="matrix-search-title">
     <div class="wrap matrix-search">
-      <a class="text-link matrix-search-link" href="${matrixSearchUrl}" target="_blank" rel="noopener">${chinese ? '在新标签页中打开房源搜索' : 'Open search in a new tab'} ${diagonal}</a>
+      <header class="matrix-search-heading">
+        <div>
+          <h1 id="matrix-search-title">Home Search</h1>
+          <p>${chinese ? '用筛选条件缩小范围，例如邮编、价格和房屋类型。' : 'Use Filters to narrow by ZIP code, price, or property type.'}</p>
+        </div>
+        <a class="button button-outline matrix-search-link" href="${matrixSearchUrl}" target="_blank" rel="noopener">${chinese ? '在新标签页中打开' : 'Open in a new tab'} ${diagonal}</a>
+      </header>
       <iframe class="matrix-search-frame" src="${matrixSearchUrl}" title="${chinese ? 'CRMLS 地图房源搜索' : 'CRMLS map property search'}"></iframe>
-    </div>${cta()}`;
+    </div>
+  </section>`;
 }
 function about(){if(siteLanguage==='zh')return `<section class="about-hero wrap"><div class="about-hero-photo"><img src="https://maplehe7.github.io/daisyli/web/assets/daisy-portrait.jpeg" alt="Daisy Li" width="500" height="540"></div><div><h1>关于 Daisy</h1>${chineseContent.biography.map(p=>`<p>${escapeHTML(p)}</p>`).join('')}<a class="button" href="/contact">微信联系 ${arrow}</a></div></section>${cta()}`;return `<section class="about-hero wrap"><div class="about-hero-photo"><img src="https://maplehe7.github.io/daisyli/web/assets/daisy-portrait.jpeg" alt="Daisy Li" width="500" height="540"></div><div><h1>About Me</h1><p>${escapeHTML(originalContent.about[0])}</p><a class="button" href="/contact">Contact Me ${arrow}</a></div></section><section class="story-section wrap original-biography"><div class="story-copy">${originalContent.about.slice(1).map(p=>`<p>${escapeHTML(p)}</p>`).join('')}</div></section><section class="wrap chinese-story" lang="zh"><div>${originalContent.chinese.map(p=>`<p>${escapeHTML(p)}</p>`).join('')}</div></section>${cta()}`;}
 function communities(slug){const p=places.find(x=>x.slug===slug);if(!p)return `${pageIntro('Neighborhoods','')}<section class="wrap section community-index"><div class="community-grid">${places.map(communityCard).join('')}</div></section>${cta()}`;const properties=[true];const content=(siteLanguage==='zh'?chineseContent:originalContent).communities[p.slug];return `<section class="community-hero"><img src="https://maplehe7.github.io/daisyli/web/assets/${encodeURIComponent(p.image)}" alt="${p.name}" width="1400" height="600"><div class="wrap"><a class="back-link" href="/neighborhoods">All neighborhoods</a><h1>${p.name}</h1></div></section><section class="wrap community-story"><h2>${escapeHTML(content.heading)}</h2><div>${content.paragraphs.map(text=>`<p>${escapeHTML(text).replace(/\n\n/g,'<br><br>')}</p>`).join('')}<a class="button" href="/search">Search homes ${arrow}</a></div></section>${properties.length?`<section class="section wrap"><div class="section-heading"><h2>${p.name} homes</h2><a class="text-link" href="/search">Search homes ${arrow}</a></div><div class="property-grid" id="community-live-listings" data-city="${p.name}">${idxLoading()}</div></section>`:''}${cta()}`;}
